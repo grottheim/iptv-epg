@@ -10,7 +10,7 @@ import sys
 import xml.etree.ElementTree as ET
 from collections import Counter
 
-from epgcommon import (COUNTRIES, ROOT, SKIP_CATS, SOURCE_PREFIX, callsign_of_id, callsigns_in_name,
+from epgcommon import (COUNTRIES, ROOT, SOURCE_PREFIX, category_matcher, callsign_of_id, callsigns_in_name,
                        download, norm, sources_for)
 
 # Namn som inte går att matcha automatiskt, per land: normaliserat leverantörsnamn -> källnamn.
@@ -37,6 +37,8 @@ ALIASES = {
         "cnbceurope": "cnbc",
     },
 }
+
+ALIASES["hockey"] = {"wbscrantonpenguins": "wilkesbarrescrantonpenguins", "utahhockeyclub": "utahmammoth"}
 
 # Regionala varianter som ska få samma tablå som huvudkanalen.
 REGIONAL = {
@@ -88,10 +90,9 @@ def main():
     missing = {}
 
     for country in countries:
-        rx = re.compile(COUNTRIES[country]["cats"])
+        in_country = category_matcher([country])
         mine = [s for s in streams
-                if rx.search(cats.get(s.get("category_id"), ""))
-                and not SKIP_CATS.search(cats.get(s.get("category_id"), ""))
+                if in_country(cats.get(s.get("category_id"), ""))
                 and not s.get("name", "").startswith("#")]
         if not mine:
             continue

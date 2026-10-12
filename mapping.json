@@ -83667,7 +83667,7 @@
     "NHL.Network.HD.us2"
    ]
   ],
-  "streams": 1,
+  "streams": 2,
   "names": [
    "TV| NHL NETWORK ᴿᴬᵂ"
   ],
@@ -102474,6 +102474,1315 @@
   ],
   "stream_ids": [
    "1423361"
+  ]
+ },
+ "NHLAlternate.us": {
+  "name": "NHL ALTERNATE",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "NHLAlternate.us"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "US| NHL ALTERNATE"
+  ],
+  "stream_ids": [
+   "746187"
+  ]
+ },
+ "AnaheimDucks.nhl": {
+  "name": "NHL TEAM| ANAHEIM DUCKS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "AnaheimDucks.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| ANAHEIM DUCKS"
+  ],
+  "stream_ids": [
+   "836405"
+  ]
+ },
+ "UtahMammoth.nhl": {
+  "name": "NHL TEAM| UTAH HOCKEY CLUB",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "UtahMammoth.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| UTAH HOCKEY CLUB"
+  ],
+  "stream_ids": [
+   "836404"
+  ]
+ },
+ "BostonBruins.nhl": {
+  "name": "NHL TEAM| BOSTON BRUINS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "BostonBruins.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| BOSTON BRUINS"
+  ],
+  "stream_ids": [
+   "836403"
+  ]
+ },
+ "BuffaloSabres.nhl": {
+  "name": "NHL TEAM| BUFFALO SABRES",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "BuffaloSabres.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| BUFFALO SABRES"
+  ],
+  "stream_ids": [
+   "836402"
+  ]
+ },
+ "CalgaryFlames.nhl": {
+  "name": "NHL TEAM| CALGARY FLAMES",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "CalgaryFlames.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| CALGARY FLAMES"
+  ],
+  "stream_ids": [
+   "836401"
+  ]
+ },
+ "CarolinaHurricanes.nhl": {
+  "name": "NHL TEAM| CAROLINA HURRICANES",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "CarolinaHurricanes.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| CAROLINA HURRICANES"
+  ],
+  "stream_ids": [
+   "836400"
+  ]
+ },
+ "ChicagoBlackhawks.nhl": {
+  "name": "NHL TEAM| CHICAGO BLACKHAWKS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "ChicagoBlackhawks.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| CHICAGO BLACKHAWKS"
+  ],
+  "stream_ids": [
+   "836399"
+  ]
+ },
+ "ColoradoAvalanche.nhl": {
+  "name": "NHL TEAM| COLORADO AVALANCHE",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "ColoradoAvalanche.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| COLORADO AVALANCHE"
+  ],
+  "stream_ids": [
+   "836398"
+  ]
+ },
+ "ColumbusBlueJackets.nhl": {
+  "name": "NHL TEAM| COLUMBUS BLUE JACKETS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "ColumbusBlueJackets.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| COLUMBUS BLUE JACKETS"
+  ],
+  "stream_ids": [
+   "836397"
+  ]
+ },
+ "DallasStars.nhl": {
+  "name": "NHL TEAM| DALLAS STARS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "DallasStars.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| DALLAS STARS"
+  ],
+  "stream_ids": [
+   "836396"
+  ]
+ },
+ "SeattleKraken.nhl": {
+  "name": "NHL TEAM| SEATTLE KRAKEN",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "SeattleKraken.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| SEATTLE KRAKEN"
+  ],
+  "stream_ids": [
+   "1787935"
+  ]
+ },
+ "DetroitRedWings.nhl": {
+  "name": "NHL TEAM| DETROIT RED WINGS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "DetroitRedWings.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| DETROIT RED WINGS"
+  ],
+  "stream_ids": [
+   "836395"
+  ]
+ },
+ "EdmontonOilers.nhl": {
+  "name": "NHL TEAM| EDMONTON OILERS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "EdmontonOilers.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| EDMONTON OILERS"
+  ],
+  "stream_ids": [
+   "836394"
+  ]
+ },
+ "FloridaPanthers.nhl": {
+  "name": "NHL TEAM| FLORIDA PANTHERS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "FloridaPanthers.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| FLORIDA PANTHERS"
+  ],
+  "stream_ids": [
+   "836393"
+  ]
+ },
+ "LosAngelesKings.nhl": {
+  "name": "NHL TEAM| LOS ANGELES KINGS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "LosAngelesKings.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| LOS ANGELES KINGS"
+  ],
+  "stream_ids": [
+   "836392"
+  ]
+ },
+ "MinnesotaWild.nhl": {
+  "name": "NHL TEAM| MINNESOTA WILD",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "MinnesotaWild.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| MINNESOTA WILD"
+  ],
+  "stream_ids": [
+   "836391"
+  ]
+ },
+ "MontrealCanadiens.nhl": {
+  "name": "NHL TEAM| MONTREAL CANADIENS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "MontrealCanadiens.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| MONTREAL CANADIENS"
+  ],
+  "stream_ids": [
+   "836390"
+  ]
+ },
+ "NashvillePredators.nhl": {
+  "name": "NHL TEAM| NASHVILLE PREDATORS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "NashvillePredators.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| NASHVILLE PREDATORS"
+  ],
+  "stream_ids": [
+   "836389"
+  ]
+ },
+ "NewJerseyDevils.nhl": {
+  "name": "NHL TEAM| NEW JERSEY DEVILS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "NewJerseyDevils.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| NEW JERSEY DEVILS"
+  ],
+  "stream_ids": [
+   "836388"
+  ]
+ },
+ "NewYorkIslanders.nhl": {
+  "name": "NHL TEAM| NEW YORK ISLANDERS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "NewYorkIslanders.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| NEW YORK ISLANDERS"
+  ],
+  "stream_ids": [
+   "836387"
+  ]
+ },
+ "NewYorkRangers.nhl": {
+  "name": "NHL TEAM| NEW YORK RANGERS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "NewYorkRangers.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| NEW YORK RANGERS"
+  ],
+  "stream_ids": [
+   "836386"
+  ]
+ },
+ "OttawaSenators.nhl": {
+  "name": "NHL TEAM| OTTAWA SENATORS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "OttawaSenators.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| OTTAWA SENATORS"
+  ],
+  "stream_ids": [
+   "836385"
+  ]
+ },
+ "PhiladelphiaFlyers.nhl": {
+  "name": "NHL TEAM| PHILADELPHIA FLYERS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "PhiladelphiaFlyers.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| PHILADELPHIA FLYERS"
+  ],
+  "stream_ids": [
+   "836384"
+  ]
+ },
+ "PittsburghPenguins.nhl": {
+  "name": "NHL TEAM| PITTSBURGH PENGUINS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "PittsburghPenguins.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| PITTSBURGH PENGUINS"
+  ],
+  "stream_ids": [
+   "836383"
+  ]
+ },
+ "SanJoseSharks.nhl": {
+  "name": "NHL TEAM| SAN JOSE SHARKS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "SanJoseSharks.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| SAN JOSE SHARKS"
+  ],
+  "stream_ids": [
+   "836382"
+  ]
+ },
+ "StLouisBlues.nhl": {
+  "name": "NHL TEAM| ST LOUIS BLUES",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "StLouisBlues.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| ST LOUIS BLUES"
+  ],
+  "stream_ids": [
+   "836381"
+  ]
+ },
+ "TampaBayLightning.nhl": {
+  "name": "NHL TEAM| TAMPA BAY LIGHTNING",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "TampaBayLightning.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| TAMPA BAY LIGHTNING"
+  ],
+  "stream_ids": [
+   "836380"
+  ]
+ },
+ "TorontoMapleLeafs.nhl": {
+  "name": "NHL TEAM| TORONTO MAPLE LEAFS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "TorontoMapleLeafs.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| TORONTO MAPLE LEAFS"
+  ],
+  "stream_ids": [
+   "836379"
+  ]
+ },
+ "VancouverCanucks.nhl": {
+  "name": "NHL TEAM| VANCOUVER CANUCKS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "VancouverCanucks.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| VANCOUVER CANUCKS"
+  ],
+  "stream_ids": [
+   "836378"
+  ]
+ },
+ "VegasGoldenKnights.nhl": {
+  "name": "NHL TEAM| VEGAS GOLDEN KNIGHTS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "VegasGoldenKnights.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| VEGAS GOLDEN KNIGHTS"
+  ],
+  "stream_ids": [
+   "836377"
+  ]
+ },
+ "WashingtonCapitals.nhl": {
+  "name": "NHL TEAM| WASHINGTON CAPITALS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "WashingtonCapitals.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| WASHINGTON CAPITALS"
+  ],
+  "stream_ids": [
+   "836376"
+  ]
+ },
+ "WinnipegJets.nhl": {
+  "name": "NHL TEAM| WINNIPEG JETS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "WinnipegJets.nhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NHL TEAM| WINNIPEG JETS"
+  ],
+  "stream_ids": [
+   "836375"
+  ]
+ },
+ "BakersfieldCondors.ahl": {
+  "name": "BAKERSFIELD CONDORS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "BakersfieldCondors.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| BAKERSFIELD CONDORS"
+  ],
+  "stream_ids": [
+   "737840"
+  ]
+ },
+ "BellevilleSenators.ahl": {
+  "name": "BELLEVILLE SENATORS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "BellevilleSenators.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| BELLEVILLE SENATORS"
+  ],
+  "stream_ids": [
+   "737839"
+  ]
+ },
+ "BridgeportIslanders.ahl": {
+  "name": "BRIDGEPORT ISLANDERS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "BridgeportIslanders.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| BRIDGEPORT ISLANDERS"
+  ],
+  "stream_ids": [
+   "737837"
+  ]
+ },
+ "ChicagoWolves.ahl": {
+  "name": "CHICAGO WOLVES",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "ChicagoWolves.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| CHICAGO WOLVES"
+  ],
+  "stream_ids": [
+   "737836"
+  ]
+ },
+ "ClevelandMonsters.ahl": {
+  "name": "CLEVELAND MONSTERS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "ClevelandMonsters.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| CLEVELAND MONSTERS"
+  ],
+  "stream_ids": [
+   "737835"
+  ]
+ },
+ "ColoradoEagles.ahl": {
+  "name": "COLORADO EAGLES",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "ColoradoEagles.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| COLORADO EAGLES"
+  ],
+  "stream_ids": [
+   "737834"
+  ]
+ },
+ "GrandRapidsGriffins.ahl": {
+  "name": "GRAND RAPIDS GRIFFINS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "GrandRapidsGriffins.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| GRAND RAPIDS GRIFFINS"
+  ],
+  "stream_ids": [
+   "737833"
+  ]
+ },
+ "HartfordWolfPack.ahl": {
+  "name": "HARTFORD WOLF PACK",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "HartfordWolfPack.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| HARTFORD WOLF PACK"
+  ],
+  "stream_ids": [
+   "737832"
+  ]
+ },
+ "HendersonSilverKnights.ahl": {
+  "name": "HENDERSON SILVER KNIGHTS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "HendersonSilverKnights.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| HENDERSON SILVER KNIGHTS"
+  ],
+  "stream_ids": [
+   "737831"
+  ]
+ },
+ "HersheyBears.ahl": {
+  "name": "HERSHEY BEARS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "HersheyBears.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| HERSHEY BEARS"
+  ],
+  "stream_ids": [
+   "737830"
+  ]
+ },
+ "IowaWild.ahl": {
+  "name": "IOWA WILD",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "IowaWild.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| IOWA WILD"
+  ],
+  "stream_ids": [
+   "737829"
+  ]
+ },
+ "LavalRocket.ahl": {
+  "name": "LAVAL ROCKET",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "LavalRocket.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| LAVAL ROCKET"
+  ],
+  "stream_ids": [
+   "737828"
+  ]
+ },
+ "LehighValleyPhantoms.ahl": {
+  "name": "LEHIGH VALLEY PHANTOMS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "LehighValleyPhantoms.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| LEHIGH VALLEY PHANTOMS"
+  ],
+  "stream_ids": [
+   "737827"
+  ]
+ },
+ "ManitobaMoose.ahl": {
+  "name": "MANITOBA MOOSE",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "ManitobaMoose.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| MANITOBA MOOSE"
+  ],
+  "stream_ids": [
+   "737826"
+  ]
+ },
+ "OntarioReign.ahl": {
+  "name": "ONTARIO REIGN",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "OntarioReign.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| ONTARIO REIGN"
+  ],
+  "stream_ids": [
+   "737825"
+  ]
+ },
+ "ProvidenceBruins.ahl": {
+  "name": "PROVIDENCE BRUINS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "ProvidenceBruins.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| PROVIDENCE BRUINS"
+  ],
+  "stream_ids": [
+   "737824"
+  ]
+ },
+ "RochesterAmericans.ahl": {
+  "name": "ROCHESTER AMERICANS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "RochesterAmericans.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| ROCHESTER AMERICANS"
+  ],
+  "stream_ids": [
+   "737823"
+  ]
+ },
+ "RockfordIceHogs.ahl": {
+  "name": "ROCKFORD ICEHOGS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "RockfordIceHogs.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| ROCKFORD ICEHOGS"
+  ],
+  "stream_ids": [
+   "737822"
+  ]
+ },
+ "SanDiegoGulls.ahl": {
+  "name": "SAN DIEGO GULLS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "SanDiegoGulls.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| SAN DIEGO GULLS"
+  ],
+  "stream_ids": [
+   "737821"
+  ]
+ },
+ "SanJoseBarracuda.ahl": {
+  "name": "SAN JOSE BARRACUDA",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "SanJoseBarracuda.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| SAN JOSE BARRACUDA"
+  ],
+  "stream_ids": [
+   "737820"
+  ]
+ },
+ "SyracuseCrunch.ahl": {
+  "name": "SYRACUSE CRUNCH",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "SyracuseCrunch.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| SYRACUSE CRUNCH"
+  ],
+  "stream_ids": [
+   "737818"
+  ]
+ },
+ "TexasStars.ahl": {
+  "name": "TEXAS STARS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "TexasStars.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| TEXAS STARS"
+  ],
+  "stream_ids": [
+   "737817"
+  ]
+ },
+ "TorontoMarlies.ahl": {
+  "name": "TORONTO MARLIES",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "TorontoMarlies.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| TORONTO MARLIES"
+  ],
+  "stream_ids": [
+   "737816"
+  ]
+ },
+ "TucsonRoadrunners.ahl": {
+  "name": "TUCSON ROADRUNNERS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "TucsonRoadrunners.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| TUCSON ROADRUNNERS"
+  ],
+  "stream_ids": [
+   "737815"
+  ]
+ },
+ "UticaComets.ahl": {
+  "name": "UTICA COMETS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "UticaComets.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| UTICA COMETS"
+  ],
+  "stream_ids": [
+   "737814"
+  ]
+ },
+ "Wilkes-Barre_ScrantonPenguins.ahl": {
+  "name": "W-B/SCRANTON PENGUINS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "Wilkes-Barre_ScrantonPenguins.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| W-B/SCRANTON PENGUINS"
+  ],
+  "stream_ids": [
+   "737813"
+  ]
+ },
+ "VictoriavilleTigres.qmjhl": {
+  "name": "VICTORIAVILLE TIGRES",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-ca",
+    "VictoriavilleTigres.qmjhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| VICTORIAVILLE TIGRES"
+  ],
+  "stream_ids": [
+   "737767"
+  ]
+ },
+ "SherbrookePhœnix.qmjhl": {
+  "name": "SHERBROOKE PHŒNIX",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-ca",
+    "SherbrookePhœnix.qmjhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| SHERBROOKE PHŒNIX"
+  ],
+  "stream_ids": [
+   "737765"
+  ]
+ },
+ "ShawiniganCataractes.qmjhl": {
+  "name": "SHAWINIGAN CATARACTES",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-ca",
+    "ShawiniganCataractes.qmjhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| SHAWINIGAN CATARACTES"
+  ],
+  "stream_ids": [
+   "737764"
+  ]
+ },
+ "SaintJohnSeaDogs.qmjhl": {
+  "name": "SAINT JOHN SEA DOGS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-ca",
+    "SaintJohnSeaDogs.qmjhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| SAINT JOHN SEA DOGS"
+  ],
+  "stream_ids": [
+   "737763"
+  ]
+ },
+ "Rouyn-NorandaHuskies.qmjhl": {
+  "name": "ROUYN-NORANDA HUSKIES",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-ca",
+    "Rouyn-NorandaHuskies.qmjhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| ROUYN-NORANDA HUSKIES"
+  ],
+  "stream_ids": [
+   "737762"
+  ]
+ },
+ "RimouskiOceanic.qmjhl": {
+  "name": "RIMOUSKI OCÉANIC",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-ca",
+    "RimouskiOceanic.qmjhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| RIMOUSKI OCÉANIC"
+  ],
+  "stream_ids": [
+   "737761"
+  ]
+ },
+ "QuebecRemparts.qmjhl": {
+  "name": "QUÉBEC REMPARTS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-ca",
+    "QuebecRemparts.qmjhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| QUÉBEC REMPARTS"
+  ],
+  "stream_ids": [
+   "737760"
+  ]
+ },
+ "MonctonWildcats.qmjhl": {
+  "name": "MONCTON WILDCATS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-ca",
+    "MonctonWildcats.qmjhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| MONCTON WILDCATS"
+  ],
+  "stream_ids": [
+   "737759"
+  ]
+ },
+ "HalifaxMooseheads.qmjhl": {
+  "name": "HALIFAX MOOSEHEADS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-ca",
+    "HalifaxMooseheads.qmjhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| HALIFAX MOOSEHEADS"
+  ],
+  "stream_ids": [
+   "737758"
+  ]
+ },
+ "GatineauOlympiques.qmjhl": {
+  "name": "GATINEAU OLYMPIQUES",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-ca",
+    "GatineauOlympiques.qmjhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| GATINEAU OLYMPIQUES"
+  ],
+  "stream_ids": [
+   "737757"
+  ]
+ },
+ "DrummondvilleVoltigeurs.qmjhl": {
+  "name": "DRUMMONDVILLE VOLTIGEURS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-ca",
+    "DrummondvilleVoltigeurs.qmjhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| DRUMMONDVILLE VOLTIGEURS"
+  ],
+  "stream_ids": [
+   "737756"
+  ]
+ },
+ "ChicoutimiSagueneens.qmjhl": {
+  "name": "CHICOUTIMI SAGUENÉENS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-ca",
+    "ChicoutimiSagueneens.qmjhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| CHICOUTIMI SAGUENÉENS"
+  ],
+  "stream_ids": [
+   "737755"
+  ]
+ },
+ "CharlottetownIslanders.qmjhl": {
+  "name": "CHARLOTTETOWN ISLANDERS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-ca",
+    "CharlottetownIslanders.qmjhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| CHARLOTTETOWN ISLANDERS"
+  ],
+  "stream_ids": [
+   "737754"
+  ]
+ },
+ "Blainville-BoisbriandArmada.qmjhl": {
+  "name": "BLAINVILLE-BOISBRIAND ARMADA",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-ca",
+    "Blainville-BoisbriandArmada.qmjhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| BLAINVILLE-BOISBRIAND ARMADA"
+  ],
+  "stream_ids": [
+   "737752"
+  ]
+ },
+ "CapeBretonEagles.qmjhl": {
+  "name": "CAPE BRETON EAGLES",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-ca",
+    "CapeBretonEagles.qmjhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| CAPE BRETON EAGLES"
+  ],
+  "stream_ids": [
+   "737753"
+  ]
+ },
+ "Baie-ComeauDrakkar.qmjhl": {
+  "name": "BAIE-COMEAU DRAKKAR",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-ca",
+    "Baie-ComeauDrakkar.qmjhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| BAIE-COMEAU DRAKKAR"
+  ],
+  "stream_ids": [
+   "737751"
+  ]
+ },
+ "Acadie-BathurstTitan.qmjhl": {
+  "name": "ACADIE-BATHURST TITAN",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-ca",
+    "Acadie-BathurstTitan.qmjhl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| ACADIE-BATHURST TITAN"
+  ],
+  "stream_ids": [
+   "737750"
+  ]
+ },
+ "CalgaryWranglers.ahl": {
+  "name": "CALGARY WRANGLERS",
+  "country": "hockey",
+  "sources": [
+   [
+    "iptvepg-us",
+    "CalgaryWranglers.ahl"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "NA| CALGARY WRANGLERS"
+  ],
+  "stream_ids": [
+   "1037028"
   ]
  }
 }

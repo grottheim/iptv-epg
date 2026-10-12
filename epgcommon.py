@@ -53,6 +53,10 @@ COUNTRIES = {
     "tr": {"cats": r"^TR\|", "iptvepg": ["tr"], "epgshare": ["TR1", "TR3"]},
     "us": {"cats": r"^US\|", "iptvepg": ["us"], "epgshare": ["US2", "US_LOCALS1", "US_SPORTS1"]},
     "ca": {"cats": r"^CA\|", "iptvepg": ["ca"], "epgshare": ["CA2", "US2"]},
+    # Lagkanaler för NHL, AHL och kanadensiska juniorligor. NHL-lagen ligger i en "PACKAGE"-kategori,
+    # därför gäller inte SKIP_CATS här.
+    "hockey": {"cats": r"^(NA\| HOCKEY LEAGUE|US\| NHL PACKAGE)", "iptvepg": ["us", "ca"], "epgshare": [],
+               "noskip": True},
 }
 
 # Kategorier utan riktig tablå (evenemang, 24/7-loopar, radio, repriser …).
@@ -61,6 +65,12 @@ SKIP_CATS = re.compile(
     r"PRIME|NETFLIX|TUBI|PLUTO|CINEMANIA|ESPN PLUS|FLO |STORE|RED BUTTON|TEAM|"
     r"LEAGUE ONE|LEAGUE TWO|CHAMPIONSHIP|NATIONAL LEAGUE|VIDIO|MC VIDEO|SDAROT|CONCERTS",
     re.I)
+
+
+def category_matcher(countries):
+    """Funktion som avgör om en kategori hör till något av länderna (med hänsyn till SKIP_CATS)."""
+    rules = [(re.compile(COUNTRIES[c]["cats"]), COUNTRIES[c].get("noskip", False)) for c in countries]
+    return lambda cat: any(rx.search(cat) and (noskip or not SKIP_CATS.search(cat)) for rx, noskip in rules)
 
 
 def sources_for(country):
@@ -97,7 +107,7 @@ def download(url, dest):
             raise RuntimeError(f"{url} gav inte XML")
 
 
-SOURCE_PREFIX = re.compile(r"^([A-Z]{2,3} - |\[[^\]]+\]\s*)")
+SOURCE_PREFIX = re.compile(r"^([A-Z]{2,5} - |\[[^\]]+\]\s*)")
 _QUALITY = (r"\b(fhd|uhd|hd|sd|lq|low|hevc|h265|4k\+?|8k|raw|gold|vip|super|backup|"
             r"\d{3,4}p|480|720|1080|50fps|60fps)\b")
 
