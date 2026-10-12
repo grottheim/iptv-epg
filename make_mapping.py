@@ -33,6 +33,7 @@ ALIASES = {
         "horseandcountry": "horseandcountrytv",
         "dwenglish": "dw",
         "bbcworldnews": "bbcnews",
+        "investigationdiscovery": ["investigationdiscovery", "id"],
         "bloombergtveurope": "bloombergtv",
         "cnbceurope": "cnbc",
     },
@@ -106,13 +107,14 @@ def main():
             n = norm(name)
             if regional and regional[0].match(n):
                 n = regional[1]
-            n = aliases.get(n, n)
+            alias = aliases.get(n, n)
+            names = (alias if isinstance(alias, list) else [alias]) + [n]   # alias kan vara en lista
             eid = (s.get("epg_channel_id") or "").strip()
 
             cs = callsigns_in_name(name) if country in ("us", "ca") else set()
             found = []
             for key, (by_name, ids, calls) in srcs:
-                sid = eid if eid in ids else by_name.get(n)
+                sid = eid if eid in ids else next((by_name[x] for x in names if x in by_name), None)
                 if not sid:
                     sid = next((calls[c] for c in sorted(cs) if c in calls), None)
                 if sid:

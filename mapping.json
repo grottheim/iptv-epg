@@ -1,1225 +1,4 @@
 {
- "SVT1.se": {
-  "name": "SVT 1",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "SVT1.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[SVT1HD].SVT1.HD.se"
-   ]
-  ],
-  "streams": 17
- },
- "SVT2.se": {
-  "name": "SVT 2",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "SVT2.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[SVT2HD].SVT2.HD.se"
-   ]
-  ],
-  "streams": 4
- },
- "TV3.se": {
-  "name": "TV 3",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "TV3.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[TV3HD].TV3.HD.se"
-   ]
-  ],
-  "streams": 3
- },
- "TV4.se": {
-  "name": "TV 4",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "TV4.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[TV4HD].TV4.HD.se"
-   ]
-  ],
-  "streams": 3
- },
- "Kanal5.se": {
-  "name": "KANAL 5",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "Kanal5.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[KANL5HD].KANAL.5.HD.se"
-   ]
-  ],
-  "streams": 3
- },
- "TV6.se": {
-  "name": "TV 6",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "TV6.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[TV6HD].TV6.HD.se"
-   ]
-  ],
-  "streams": 3
- },
- "Sjuan.se": {
-  "name": "SJUAN",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "Sjuan.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[SJUHD].Sjuan.HD.se"
-   ]
-  ],
-  "streams": 3
- },
- "TV8.se": {
-  "name": "TV 8",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "TV8.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[TV8HD].TV8.HD.se"
-   ]
-  ],
-  "streams": 3
- },
- "Kanal9.se": {
-  "name": "KANAL 9",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "Kanal9.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[KANAL9H].Kanal.9.HD.se"
-   ]
-  ],
-  "streams": 3
- },
- "TV10.se": {
-  "name": "TV 10",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "TV10.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[TV10HD].TV10.HD.se"
-   ]
-  ],
-  "streams": 3
- },
- "Kanal11.se": {
-  "name": "KANAL 11",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "Kanal11.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[KANL11H].Kanal.11.HD.se"
-   ]
-  ],
-  "streams": 3
- },
- "TV12.se": {
-  "name": "TV 12",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "TV12.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[TV12HD].TV12.HD.se"
-   ]
-  ],
-  "streams": 3
- },
- "SFkanalen.se": {
-  "name": "SF-KANALEN",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "SFKanalen.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[SFKANAL].SF.Kanalen.se"
-   ]
-  ],
-  "streams": 1
- },
- "SkyShowtime1.se": {
-  "name": "SKY SHOWTIME 1 HD",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "SkyShowtime1.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[SKYS1SV].SkyShowtime.1.se"
-   ]
-  ],
-  "streams": 2,
-  "names": [
-   "SWE| SKY SHOWTIME 1 HD",
-   "SWE| SKY SHOWTIME 1 HEVC"
-  ],
-  "stream_ids": [
-   "965340",
-   "965357"
-  ]
- },
- "SkyShowtime2.se": {
-  "name": "SKY SHOWTIME 2 HD",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "SkyShowtime2.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[SKYS2SV].SkyShowtime.2.se"
-   ]
-  ],
-  "streams": 2,
-  "names": [
-   "SWE| SKY SHOWTIME 2 HD",
-   "SWE| SKY SHOWTIME 2 HEVC"
-  ],
-  "stream_ids": [
-   "79974",
-   "965356"
-  ]
- },
- "TV4Film.se": {
-  "name": "TV 4 FILM",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "TV4Film.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[TV4FILM].TV4.Film.se"
-   ]
-  ],
-  "streams": 1
- },
- "TV4Guld.se": {
-  "name": "TV 4 GULD",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "TV4Guld.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[TV4GULD].TV4.Guld.se"
-   ]
-  ],
-  "streams": 1
- },
- "TV4Hits.se": {
-  "name": "TV 4 HITS",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "TV4Hits.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[TV4HISV].TV4.Hits.se"
-   ]
-  ],
-  "streams": 2
- },
- "TV4Stars.se": {
-  "name": "TV 4 STARS",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "TV4Stars.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[TV4STSV].TV4.Stars.se"
-   ]
-  ],
-  "streams": 2
- },
- "ViasatFilmAction.se": {
-  "name": "V FILM ACTION HD",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "VFilmAction.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[FMACTHD].V.Film.Action.HD.se"
-   ]
-  ],
-  "streams": 3
- },
- "ViasatFilmFamily.se": {
-  "name": "V FILM FAMILY",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "VFilmFamily.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[VIAFAMI].V.Film.Family.se"
-   ]
-  ],
-  "streams": 2
- },
- "ViasatFilmHits.se": {
-  "name": "V FILM HITS HD",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "VFilmHits.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[VIAHTHD].V.Film.Hits.HD.se"
-   ]
-  ],
-  "streams": 3
- },
- "ViasatFilmPremiere.se": {
-  "name": "V FILM PREMIERE HD",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "VFilmPremiere.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[VIAFILHD].V.Film.Premiere.HD.se"
-   ]
-  ],
-  "streams": 3
- },
- "ViasatSeries.se": {
-  "name": "V SERIES",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "VSeries.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[VIASEHD].V.Series.HD.se"
-   ]
-  ],
-  "streams": 4
- },
- "ATGLive.se": {
-  "name": "ATG LIVE HD",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "ATGLive.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[ATGLIVE].ATG.Live.se"
-   ]
-  ],
-  "streams": 2,
-  "names": [
-   "SWE| ATG LIVE HD",
-   "SWE| ATG LIVE HEVC"
-  ],
-  "stream_ids": [
-   "294027",
-   "294028"
-  ]
- },
- "Eurosport1.se": {
-  "name": "EUROSPORT 1",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "Eurosport1.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[EUROSHD].Eurosport.1.HD.se"
-   ]
-  ],
-  "streams": 3
- },
- "Eurosport2.se": {
-  "name": "EUROSPORT 2",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "Eurosport2.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[EURSP2H].Eurosport.2.HD.se"
-   ]
-  ],
-  "streams": 2
- },
- "Eurosport2.es": {
-  "name": "EUROSPORT 2 HD",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "Eurosport2.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[EURSP2H].Eurosport.2.HD.se"
-   ]
-  ],
-  "streams": 10,
-  "names": [
-   "ES-C| EUROSPORT 2 ᴿᴬᵂ",
-   "ES-AV| EUROSPORT2 ᴿᴬᵂ",
-   "ES| EUROSPORT 2 ᴴᴰ",
-   "ES| EUROSPORT 2 SD",
-   "ES| EUROSPORT 2 ᴿᴬᵂ",
-   "ES| EUROSPORT 2 FHD",
-   "ES| EUROSPORT 2 HD"
-  ],
-  "stream_ids": [
-   "2068289",
-   "2069646",
-   "2139028",
-   "2139022",
-   "2139016",
-   "1510695",
-   "1510696"
-  ]
- },
- "Sportkanalen.se": {
-  "name": "SPORTKANALEN",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "TV4Sportkanalen.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[SPORTK].TV4.Sportkanalen.se"
-   ]
-  ],
-  "streams": 3
- },
- "TV4Fotboll.se": {
-  "name": "TV 4 FOTBOLL",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "TV4Fotboll.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[TV4FOSV].TV4.Fotboll.se"
-   ]
-  ],
-  "streams": 3
- },
- "TV4Hockey.se": {
-  "name": "TV 4 HOCKEY",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "TV4Hockey.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[TV4HOSV].TV4.Hockey.se"
-   ]
-  ],
-  "streams": 3
- },
- "TV4Motor.se": {
-  "name": "TV 4 MOTOR",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "TV4Motor.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[TV4MOSV].TV4.Motor.se"
-   ]
-  ],
-  "streams": 3,
-  "names": [
-   "SWE| TV 4 MOTOR",
-   "SWE| TV 4 MOTOR HD",
-   "SWE| TV 4 MOTOR HEVC"
-  ],
-  "stream_ids": [
-   "294083",
-   "294051",
-   "294052"
-  ]
- },
- "TV4SportLive1.se": {
-  "name": "TV 4 SPORT LIVE 1",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "TV4SportLive1.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[TV4SPL1].TV4.Sport.Live.1.se"
-   ]
-  ],
-  "streams": 3,
-  "names": [
-   "SWE| TV 4 SPORT LIVE 1",
-   "SWE| TV 4 SPORT LIVE 1 HD",
-   "SWE| TV 4 SPORT LIVE 1 HEVC"
-  ],
-  "stream_ids": [
-   "294081",
-   "294047",
-   "294048"
-  ]
- },
- "TV4SportLive2.se": {
-  "name": "TV 4 SPORT LIVE 2",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "TV4SportLive2.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[TV4SPL2].TV4.Sport.Live.2.se"
-   ]
-  ],
-  "streams": 3,
-  "names": [
-   "SWE| TV 4 SPORT LIVE 2",
-   "SWE| TV 4 SPORT LIVE 2 HD",
-   "SWE| TV 4 SPORT LIVE 2 HEVC"
-  ],
-  "stream_ids": [
-   "294080",
-   "294045",
-   "294046"
-  ]
- },
- "TV4SportLive3.se": {
-  "name": "TV 4 SPORT LIVE 3",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "TV4SportLive3.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[TV4SPL3].TV4.Sport.Live.3.se"
-   ]
-  ],
-  "streams": 3,
-  "names": [
-   "SWE| TV 4 SPORT LIVE 3",
-   "SWE| TV 4 SPORT LIVE 3 HD",
-   "SWE| TV 4 SPORT LIVE 3 HEVC"
-  ],
-  "stream_ids": [
-   "294079",
-   "294043",
-   "294044"
-  ]
- },
- "TV4SportLive4.se": {
-  "name": "TV 4 SPORT LIVE 4",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "TV4SportLive4.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[TV4SPL4].TV4.Sport.Live.4.se"
-   ]
-  ],
-  "streams": 3,
-  "names": [
-   "SWE| TV 4 SPORT LIVE 4",
-   "SWE| TV 4 SPORT LIVE 4 HD",
-   "SWE| TV 4 SPORT LIVE 4 HEVC"
-  ],
-  "stream_ids": [
-   "294078",
-   "294041",
-   "294042"
-  ]
- },
- "ViasatFotboll.se": {
-  "name": "V FOTBOLL",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "VSportFotboll.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[VIAFOHD].V.Sport.Fotboll.HD.se"
-   ]
-  ],
-  "streams": 3
- },
- "ViasatMotor.se": {
-  "name": "V MOTOR",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "VSportMotor.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[VIASMHD].V.Sport.Motor.HD.se"
-   ]
-  ],
-  "streams": 3
- },
- "ViasatSport.se": {
-  "name": "V SPORT",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "VSport1.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[VIASPHD].V.Sport.1.HD.se"
-   ]
-  ],
-  "streams": 3
- },
- "VSportLive1.se": {
-  "name": "V SPORT 1 LIVE HD",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "VSportLive1.se"
-   ]
-  ],
-  "streams": 1
- },
- "ViasatSportExtra.se": {
-  "name": "V SPORT EXTRA",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "VSportExtra.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[VSSPXHD].V.Sport.Extra.HD.se"
-   ]
-  ],
-  "streams": 3
- },
- "ViasatGolf.se": {
-  "name": "VIASAT GOLF",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "VSportGolf.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[VGOLFHD].V.Sport.Golf.HD.se"
-   ]
-  ],
-  "streams": 3
- },
- "ViasatSportPremium.se": {
-  "name": "V SPORT PREMIUM",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "VSportPremium.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[VIASPOH].V.Sport.Premium.HD.se"
-   ]
-  ],
-  "streams": 3
- },
- "ViasatSportUltraHD.se": {
-  "name": "V SPORT ULTRA",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "VSportUltra.se"
-   ]
-  ],
-  "streams": 3
- },
- "ViasatSportVinter.se": {
-  "name": "V VINTER",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "VSportVinter.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[VSPOVIS].V.Sport.Vinter.se"
-   ]
-  ],
-  "streams": 4
- },
- "CartoonNetwork.se": {
-  "name": "CARTOON NETWORK",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "CartoonNetwork.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[CARTNET].Cartoon.Network.se"
-   ]
-  ],
-  "streams": 1
- },
- "Nickelodeon.se": {
-  "name": "NICKELODEON",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "Nickelodeon.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[NICKEHD].Nickelodeon.HD.se"
-   ]
-  ],
-  "streams": 2
- },
- "Nicktoons.se": {
-  "name": "NICKTOONS SCANDINAVIA",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "Nicktoons.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[NICKTSW].Nicktoons.se"
-   ]
-  ],
-  "streams": 1
- },
- "SVT24.se": {
-  "name": "SVT 24 / BARNKANALEN",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "SVTB/SVT24.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[COMSVHD].SVTB/SVT24.HD.se"
-   ]
-  ],
-  "streams": 2
- },
- "AnimalPlanet.se": {
-  "name": "ANIMAL PLANET",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "AnimalPlanet.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[ANIPLHD].Animal.Planet.HD.se"
-   ]
-  ],
-  "streams": 2
- },
- "DiscoveryChannel.se": {
-  "name": "DISCOVERY CHANNEL",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "DiscoveryChannel.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[DISCOHD].Discovery.Channel.HD.se"
-   ]
-  ],
-  "streams": 3
- },
- "DiscoveryScience.se": {
-  "name": "DISCOVERY SCIENCE",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "DiscoveryScience.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[DISCSCI].Discovery.Science.se"
-   ]
-  ],
-  "streams": 1
- },
- "Godare.se": {
-  "name": "GODARE",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "Godare.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[MATKANS].Godare.se"
-   ]
-  ],
-  "streams": 2
- },
- "HistoryChannel.se": {
-  "name": "HISTORY CHANNEL HD",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "History.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[HISTOSD].History.se"
-   ]
-  ],
-  "streams": 2
- },
- "H2.se": {
-  "name": "HISTORY CHANNEL 2 HD",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "H2.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[H2HDSWE].H2.HD.se"
-   ]
-  ],
-  "streams": 1,
-  "names": [
-   "SWE| HISTORY CHANNEL 2 HD"
-  ],
-  "stream_ids": [
-   "1813529"
-  ]
- },
- "Horse\\u0026CountryTV.se": {
-  "name": "HORSE & COUNTRY",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "Horse\\u0026CountryTV.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[HORSECT].Horse.&.Country.TV.se"
-   ]
-  ],
-  "streams": 1,
-  "names": [
-   "SWE| HORSE & COUNTRY"
-  ],
-  "stream_ids": [
-   "79989"
-  ]
- },
- "InvestigationDiscovery.se": {
-  "name": "INVESTIGATION DISCOVERY",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "InvestigationDiscovery.se"
-   ]
-  ],
-  "streams": 2
- },
- "Kunskapskanalen.se": {
-  "name": "KUNSKAPSKANALEN",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "Kunskapskanalen.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[KUNSKHD].Kunskapskanalen.HD.se"
-   ]
-  ],
-  "streams": 2
- },
- "NationalGeographic.se": {
-  "name": "NATIONAL GEOGRAPHIC",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "NationalGeographic.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[NATGEHD].National.Geographic.HD.se"
-   ]
-  ],
-  "streams": 3
- },
- "NatGeoWild.se": {
-  "name": "NAT GEO WILD HD",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "NationalGeographicWild.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[NATGWHD].National.Geographic.Wild.HD.se"
-   ]
-  ],
-  "streams": 2
- },
- "TLC.se": {
-  "name": "TLC HD",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "TLC.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[TLCSWHD].TLC.HD.se"
-   ]
-  ],
-  "streams": 2
- },
- "TV4Fakta.se": {
-  "name": "TV 4 FAKTA",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "TV4Fakta.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[TV4FAKT].TV4.Fakta.se"
-   ]
-  ],
-  "streams": 1
- },
- "ViasatExplore.se": {
-  "name": "VIASAT EXPLORE HD",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "ViasatExplore.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[VIAEXPL].Viasat.Explore.se"
-   ]
-  ],
-  "streams": 2
- },
- "ViasatHistory.se": {
-  "name": "VIASAT HISTORY HD",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "ViasatHistory.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[VIAHIST].Viasat.History.se"
-   ]
-  ],
-  "streams": 2
- },
- "ViasatNature.se": {
-  "name": "VIASAT NATURE HD",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "ViasatNature.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[VIANAT].Viasat.Nature.se"
-   ]
-  ],
-  "streams": 2
- },
- "MTV.se": {
-  "name": "MTV",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "MTV.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[MTVSWHD].MTV.HD.se"
-   ]
-  ],
-  "streams": 1
- },
- "AlJazeeraEnglish.se": {
-  "name": "AL JAZEERA ENGLISH HD",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "AlJazeeraEnglish.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[ALJAZEN].Al.Jazeera.English.se"
-   ]
-  ],
-  "streams": 1,
-  "names": [
-   "SWE| AL JAZEERA ENGLISH HD"
-  ],
-  "stream_ids": [
-   "965342"
-  ]
- },
- "AxessTV.se": {
-  "name": "AXESS TV HD",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "AxessTV.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[AXESSTV].Axess.TV.se"
-   ]
-  ],
-  "streams": 2
- },
- "BBCNews.se": {
-  "name": "BBC WORLD NEWS",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "BBCNews.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[BBCNEEU].BBC.News.se"
-   ]
-  ],
-  "streams": 1,
-  "names": [
-   "SWE| BBC WORLD NEWS"
-  ],
-  "stream_ids": [
-   "79965"
-  ]
- },
- "BBCNordic.se": {
-  "name": "BBC NORDIC HD",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "BBCNordic.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[BBCNRDC].BBC.Nordic.se"
-   ]
-  ],
-  "streams": 2,
-  "names": [
-   "SWE| BBC NORDIC HD",
-   "SWE| BBC NORDIC FHD"
-  ],
-  "stream_ids": [
-   "1177882",
-   "1177881"
-  ]
- },
- "CNBC.se": {
-  "name": "CNBC EUROPE",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "CNBC.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[CNBCEHD].CNBC.HD.se"
-   ]
-  ],
-  "streams": 1,
-  "names": [
-   "SWE| CNBC EUROPE"
-  ],
-  "stream_ids": [
-   "80059"
-  ]
- },
- "CNNInternational.se": {
-  "name": "CNN INTERNATIONAL",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "CNNInternational.se"
-   ],
-   [
-    "epgshare-SE1",
-    "[CNNEU].CNN.International.se"
-   ]
-  ],
-  "streams": 1,
-  "names": [
-   "SWE| CNN INTERNATIONAL"
-  ],
-  "stream_ids": [
-   "80060"
-  ]
- },
- "DW.se": {
-  "name": "DW ENGLISH HD",
-  "country": "se",
-  "sources": [
-   [
-    "iptvepg-se",
-    "DW.se"
-   ]
-  ],
-  "streams": 1,
-  "names": [
-   "SWE| DW ENGLISH HD"
-  ],
-  "stream_ids": [
-   "965341"
-  ]
- },
  "nrk1.no": {
   "name": "NRK1 HD",
   "country": "no",
@@ -103783,6 +102562,1213 @@
   ],
   "stream_ids": [
    "1037028"
+  ]
+ },
+ "SVT1.se": {
+  "name": "SVT 1",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "SVT1.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[SVT1HD].SVT1.HD.se"
+   ]
+  ],
+  "streams": 17
+ },
+ "SVT2.se": {
+  "name": "SVT 2",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "SVT2.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[SVT2HD].SVT2.HD.se"
+   ]
+  ],
+  "streams": 4
+ },
+ "TV3.se": {
+  "name": "TV 3",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "TV3.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[TV3HD].TV3.HD.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "TV4.se": {
+  "name": "TV 4",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "TV4.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[TV4HD].TV4.HD.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "Kanal5.se": {
+  "name": "KANAL 5",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "Kanal5.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[KANL5HD].KANAL.5.HD.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "TV6.se": {
+  "name": "TV 6",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "TV6.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[TV6HD].TV6.HD.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "Sjuan.se": {
+  "name": "SJUAN",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "Sjuan.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[SJUHD].Sjuan.HD.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "TV8.se": {
+  "name": "TV 8",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "TV8.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[TV8HD].TV8.HD.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "Kanal9.se": {
+  "name": "KANAL 9",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "Kanal9.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[KANAL9H].Kanal.9.HD.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "TV10.se": {
+  "name": "TV 10",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "TV10.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[TV10HD].TV10.HD.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "Kanal11.se": {
+  "name": "KANAL 11",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "Kanal11.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[KANL11H].Kanal.11.HD.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "TV12.se": {
+  "name": "TV 12",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "TV12.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[TV12HD].TV12.HD.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "SFkanalen.se": {
+  "name": "SF-KANALEN",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "SFKanalen.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[SFKANAL].SF.Kanalen.se"
+   ]
+  ],
+  "streams": 1
+ },
+ "SkyShowtime1.se": {
+  "name": "SKY SHOWTIME 1 HD",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "SkyShowtime1.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[SKYS1SV].SkyShowtime.1.se"
+   ]
+  ],
+  "streams": 2,
+  "names": [
+   "SWE| SKY SHOWTIME 1 HD",
+   "SWE| SKY SHOWTIME 1 HEVC"
+  ],
+  "stream_ids": [
+   "965340",
+   "965357"
+  ]
+ },
+ "SkyShowtime2.se": {
+  "name": "SKY SHOWTIME 2 HD",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "SkyShowtime2.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[SKYS2SV].SkyShowtime.2.se"
+   ]
+  ],
+  "streams": 2,
+  "names": [
+   "SWE| SKY SHOWTIME 2 HD",
+   "SWE| SKY SHOWTIME 2 HEVC"
+  ],
+  "stream_ids": [
+   "79974",
+   "965356"
+  ]
+ },
+ "TV4Film.se": {
+  "name": "TV 4 FILM",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "TV4Film.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[TV4FILM].TV4.Film.se"
+   ]
+  ],
+  "streams": 1
+ },
+ "TV4Guld.se": {
+  "name": "TV 4 GULD",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "TV4Guld.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[TV4GULD].TV4.Guld.se"
+   ]
+  ],
+  "streams": 1
+ },
+ "TV4Hits.se": {
+  "name": "TV 4 HITS",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "TV4Hits.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[TV4HISV].TV4.Hits.se"
+   ]
+  ],
+  "streams": 2
+ },
+ "TV4Stars.se": {
+  "name": "TV 4 STARS",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "TV4Stars.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[TV4STSV].TV4.Stars.se"
+   ]
+  ],
+  "streams": 2
+ },
+ "ViasatFilmAction.se": {
+  "name": "V FILM ACTION HD",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "VFilmAction.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[FMACTHD].V.Film.Action.HD.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "ViasatFilmFamily.se": {
+  "name": "V FILM FAMILY",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "VFilmFamily.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[VIAFAMI].V.Film.Family.se"
+   ]
+  ],
+  "streams": 2
+ },
+ "ViasatFilmHits.se": {
+  "name": "V FILM HITS HD",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "VFilmHits.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[VIAHTHD].V.Film.Hits.HD.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "ViasatFilmPremiere.se": {
+  "name": "V FILM PREMIERE HD",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "VFilmPremiere.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[VIAFILHD].V.Film.Premiere.HD.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "ViasatSeries.se": {
+  "name": "V SERIES",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "VSeries.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[VIASEHD].V.Series.HD.se"
+   ]
+  ],
+  "streams": 4
+ },
+ "ATGLive.se": {
+  "name": "ATG LIVE HD",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "ATGLive.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[ATGLIVE].ATG.Live.se"
+   ]
+  ],
+  "streams": 2,
+  "names": [
+   "SWE| ATG LIVE HD",
+   "SWE| ATG LIVE HEVC"
+  ],
+  "stream_ids": [
+   "294027",
+   "294028"
+  ]
+ },
+ "Eurosport1.se": {
+  "name": "EUROSPORT 1",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "Eurosport1.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[EUROSHD].Eurosport.1.HD.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "Eurosport2.se": {
+  "name": "EUROSPORT 2",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "Eurosport2.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[EURSP2H].Eurosport.2.HD.se"
+   ]
+  ],
+  "streams": 2
+ },
+ "Eurosport2.es": {
+  "name": "EUROSPORT 2 HD",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "Eurosport2.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[EURSP2H].Eurosport.2.HD.se"
+   ]
+  ],
+  "streams": 1
+ },
+ "Sportkanalen.se": {
+  "name": "SPORTKANALEN",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "TV4Sportkanalen.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[SPORTK].TV4.Sportkanalen.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "TV4Fotboll.se": {
+  "name": "TV 4 FOTBOLL",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "TV4Fotboll.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[TV4FOSV].TV4.Fotboll.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "TV4Hockey.se": {
+  "name": "TV 4 HOCKEY",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "TV4Hockey.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[TV4HOSV].TV4.Hockey.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "TV4Motor.se": {
+  "name": "TV 4 MOTOR",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "TV4Motor.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[TV4MOSV].TV4.Motor.se"
+   ]
+  ],
+  "streams": 3,
+  "names": [
+   "SWE| TV 4 MOTOR",
+   "SWE| TV 4 MOTOR HD",
+   "SWE| TV 4 MOTOR HEVC"
+  ],
+  "stream_ids": [
+   "294083",
+   "294051",
+   "294052"
+  ]
+ },
+ "TV4SportLive1.se": {
+  "name": "TV 4 SPORT LIVE 1",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "TV4SportLive1.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[TV4SPL1].TV4.Sport.Live.1.se"
+   ]
+  ],
+  "streams": 3,
+  "names": [
+   "SWE| TV 4 SPORT LIVE 1",
+   "SWE| TV 4 SPORT LIVE 1 HD",
+   "SWE| TV 4 SPORT LIVE 1 HEVC"
+  ],
+  "stream_ids": [
+   "294081",
+   "294047",
+   "294048"
+  ]
+ },
+ "TV4SportLive2.se": {
+  "name": "TV 4 SPORT LIVE 2",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "TV4SportLive2.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[TV4SPL2].TV4.Sport.Live.2.se"
+   ]
+  ],
+  "streams": 3,
+  "names": [
+   "SWE| TV 4 SPORT LIVE 2",
+   "SWE| TV 4 SPORT LIVE 2 HD",
+   "SWE| TV 4 SPORT LIVE 2 HEVC"
+  ],
+  "stream_ids": [
+   "294080",
+   "294045",
+   "294046"
+  ]
+ },
+ "TV4SportLive3.se": {
+  "name": "TV 4 SPORT LIVE 3",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "TV4SportLive3.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[TV4SPL3].TV4.Sport.Live.3.se"
+   ]
+  ],
+  "streams": 3,
+  "names": [
+   "SWE| TV 4 SPORT LIVE 3",
+   "SWE| TV 4 SPORT LIVE 3 HD",
+   "SWE| TV 4 SPORT LIVE 3 HEVC"
+  ],
+  "stream_ids": [
+   "294079",
+   "294043",
+   "294044"
+  ]
+ },
+ "TV4SportLive4.se": {
+  "name": "TV 4 SPORT LIVE 4",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "TV4SportLive4.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[TV4SPL4].TV4.Sport.Live.4.se"
+   ]
+  ],
+  "streams": 3,
+  "names": [
+   "SWE| TV 4 SPORT LIVE 4",
+   "SWE| TV 4 SPORT LIVE 4 HD",
+   "SWE| TV 4 SPORT LIVE 4 HEVC"
+  ],
+  "stream_ids": [
+   "294078",
+   "294041",
+   "294042"
+  ]
+ },
+ "ViasatFotboll.se": {
+  "name": "V FOTBOLL",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "VSportFotboll.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[VIAFOHD].V.Sport.Fotboll.HD.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "ViasatMotor.se": {
+  "name": "V MOTOR",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "VSportMotor.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[VIASMHD].V.Sport.Motor.HD.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "ViasatSport.se": {
+  "name": "V SPORT",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "VSport1.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[VIASPHD].V.Sport.1.HD.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "VSportLive1.se": {
+  "name": "V SPORT 1 LIVE HD",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "VSportLive1.se"
+   ]
+  ],
+  "streams": 1
+ },
+ "ViasatSportExtra.se": {
+  "name": "V SPORT EXTRA",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "VSportExtra.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[VSSPXHD].V.Sport.Extra.HD.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "ViasatGolf.se": {
+  "name": "VIASAT GOLF",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "VSportGolf.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[VGOLFHD].V.Sport.Golf.HD.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "ViasatSportPremium.se": {
+  "name": "V SPORT PREMIUM",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "VSportPremium.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[VIASPOH].V.Sport.Premium.HD.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "ViasatSportUltraHD.se": {
+  "name": "V SPORT ULTRA",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "VSportUltra.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "ViasatSportVinter.se": {
+  "name": "V VINTER",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "VSportVinter.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[VSPOVIS].V.Sport.Vinter.se"
+   ]
+  ],
+  "streams": 4
+ },
+ "CartoonNetwork.se": {
+  "name": "CARTOON NETWORK",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "CartoonNetwork.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[CARTNET].Cartoon.Network.se"
+   ]
+  ],
+  "streams": 1
+ },
+ "Nickelodeon.se": {
+  "name": "NICKELODEON",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "Nickelodeon.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[NICKEHD].Nickelodeon.HD.se"
+   ]
+  ],
+  "streams": 2
+ },
+ "Nicktoons.se": {
+  "name": "NICKTOONS SCANDINAVIA",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "Nicktoons.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[NICKTSW].Nicktoons.se"
+   ]
+  ],
+  "streams": 1
+ },
+ "SVT24.se": {
+  "name": "SVT 24 / BARNKANALEN",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "SVTB/SVT24.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[COMSVHD].SVTB/SVT24.HD.se"
+   ]
+  ],
+  "streams": 2
+ },
+ "AnimalPlanet.se": {
+  "name": "ANIMAL PLANET",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "AnimalPlanet.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[ANIPLHD].Animal.Planet.HD.se"
+   ]
+  ],
+  "streams": 2
+ },
+ "DiscoveryChannel.se": {
+  "name": "DISCOVERY CHANNEL",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "DiscoveryChannel.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[DISCOHD].Discovery.Channel.HD.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "DiscoveryScience.se": {
+  "name": "DISCOVERY SCIENCE",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "DiscoveryScience.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[DISCSCI].Discovery.Science.se"
+   ]
+  ],
+  "streams": 1
+ },
+ "Godare.se": {
+  "name": "GODARE",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "Godare.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[MATKANS].Godare.se"
+   ]
+  ],
+  "streams": 2
+ },
+ "HistoryChannel.se": {
+  "name": "HISTORY CHANNEL HD",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "History.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[HISTOSD].History.se"
+   ]
+  ],
+  "streams": 2
+ },
+ "H2.se": {
+  "name": "HISTORY CHANNEL 2 HD",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "H2.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[H2HDSWE].H2.HD.se"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "SWE| HISTORY CHANNEL 2 HD"
+  ],
+  "stream_ids": [
+   "1813529"
+  ]
+ },
+ "Horse\\u0026CountryTV.se": {
+  "name": "HORSE & COUNTRY",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "Horse\\u0026CountryTV.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[HORSECT].Horse.&.Country.TV.se"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "SWE| HORSE & COUNTRY"
+  ],
+  "stream_ids": [
+   "79989"
+  ]
+ },
+ "InvestigationDiscovery.se": {
+  "name": "INVESTIGATION DISCOVERY",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "InvestigationDiscovery.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[IDSWE].ID.se"
+   ]
+  ],
+  "streams": 2
+ },
+ "Kunskapskanalen.se": {
+  "name": "KUNSKAPSKANALEN",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "Kunskapskanalen.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[KUNSKHD].Kunskapskanalen.HD.se"
+   ]
+  ],
+  "streams": 2
+ },
+ "NationalGeographic.se": {
+  "name": "NATIONAL GEOGRAPHIC",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "NationalGeographic.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[NATGEHD].National.Geographic.HD.se"
+   ]
+  ],
+  "streams": 3
+ },
+ "NatGeoWild.se": {
+  "name": "NAT GEO WILD HD",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "NationalGeographicWild.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[NATGWHD].National.Geographic.Wild.HD.se"
+   ]
+  ],
+  "streams": 2
+ },
+ "TLC.se": {
+  "name": "TLC HD",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "TLC.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[TLCSWHD].TLC.HD.se"
+   ]
+  ],
+  "streams": 2
+ },
+ "TV4Fakta.se": {
+  "name": "TV 4 FAKTA",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "TV4Fakta.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[TV4FAKT].TV4.Fakta.se"
+   ]
+  ],
+  "streams": 1
+ },
+ "ViasatExplore.se": {
+  "name": "VIASAT EXPLORE HD",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "ViasatExplore.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[VIAEXPL].Viasat.Explore.se"
+   ]
+  ],
+  "streams": 2
+ },
+ "ViasatHistory.se": {
+  "name": "VIASAT HISTORY HD",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "ViasatHistory.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[VIAHIST].Viasat.History.se"
+   ]
+  ],
+  "streams": 2
+ },
+ "ViasatNature.se": {
+  "name": "VIASAT NATURE HD",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "ViasatNature.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[VIANAT].Viasat.Nature.se"
+   ]
+  ],
+  "streams": 2
+ },
+ "MTV.se": {
+  "name": "MTV",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "MTV.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[MTVSWHD].MTV.HD.se"
+   ]
+  ],
+  "streams": 1
+ },
+ "AlJazeeraEnglish.se": {
+  "name": "AL JAZEERA ENGLISH HD",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "AlJazeeraEnglish.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[ALJAZEN].Al.Jazeera.English.se"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "SWE| AL JAZEERA ENGLISH HD"
+  ],
+  "stream_ids": [
+   "965342"
+  ]
+ },
+ "AxessTV.se": {
+  "name": "AXESS TV HD",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "AxessTV.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[AXESSTV].Axess.TV.se"
+   ]
+  ],
+  "streams": 2
+ },
+ "BBCNews.se": {
+  "name": "BBC WORLD NEWS",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "BBCNews.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[BBCNEEU].BBC.News.se"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "SWE| BBC WORLD NEWS"
+  ],
+  "stream_ids": [
+   "79965"
+  ]
+ },
+ "BBCNordic.se": {
+  "name": "BBC NORDIC HD",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "BBCNordic.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[BBCNRDC].BBC.Nordic.se"
+   ]
+  ],
+  "streams": 2,
+  "names": [
+   "SWE| BBC NORDIC HD",
+   "SWE| BBC NORDIC FHD"
+  ],
+  "stream_ids": [
+   "1177882",
+   "1177881"
+  ]
+ },
+ "CNBC.se": {
+  "name": "CNBC EUROPE",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "CNBC.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[CNBCEHD].CNBC.HD.se"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "SWE| CNBC EUROPE"
+  ],
+  "stream_ids": [
+   "80059"
+  ]
+ },
+ "CNNInternational.se": {
+  "name": "CNN INTERNATIONAL",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "CNNInternational.se"
+   ],
+   [
+    "epgshare-SE1",
+    "[CNNEU].CNN.International.se"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "SWE| CNN INTERNATIONAL"
+  ],
+  "stream_ids": [
+   "80060"
+  ]
+ },
+ "DW.se": {
+  "name": "DW ENGLISH HD",
+  "country": "se",
+  "sources": [
+   [
+    "iptvepg-se",
+    "DW.se"
+   ]
+  ],
+  "streams": 1,
+  "names": [
+   "SWE| DW ENGLISH HD"
+  ],
+  "stream_ids": [
+   "965341"
   ]
  }
 }
