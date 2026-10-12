@@ -4,22 +4,33 @@ on:
   schedule:
     - cron: "0 3,15 * * *"   # 05:00 och 17:00 svensk sommartid
   workflow_dispatch:
+  push:
+    branches: [main]
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: python3 build_epg.py
-      - name: Spara ny EPG
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@users.noreply.github.com"
-          git add docs/epg.xml.gz
-          git diff --cached --quiet || git commit -m "Uppdatera EPG" && git push
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - id: deploy
+        uses: actions/deploy-pages@v4

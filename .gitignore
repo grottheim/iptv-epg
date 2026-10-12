@@ -3,3 +3,5 @@ cache/
 epg_rapport.csv
 __pycache__/
 .DS_Store
+docs/*.xml.gz
+docs/index.html

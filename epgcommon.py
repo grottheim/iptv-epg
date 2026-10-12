@@ -1,6 +1,7 @@
-"""Gemensamma hjälpfunktioner för EPG-skripten."""
+"""Gemensamma hjälpfunktioner och inställningar för EPG-skripten."""
 import gzip
 import re
+import shutil
 import unicodedata
 import urllib.request
 from pathlib import Path
@@ -8,34 +9,130 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 UA = "Mozilla/5.0 EPG-builder"
 
-# Externa källor i prioritetsordning. Prefix tas bort från display-name vid matchning.
-SOURCES = [
-    {"key": "iptvepg", "url": "https://iptv-epg.org/files/epg-se.xml.gz", "prefix": r"^SE - "},
-    {"key": "epgshare", "url": "https://epgshare01.online/epgshare01/epg_ripper_SE1.xml.gz",
-     "prefix": r"^\[[^\]]+\]\s*"},
-]
+IPTVEPG = "https://iptv-epg.org/files/epg-{}.xml.gz"
+EPGSHARE = "https://epgshare01.online/epgshare01/epg_ripper_{}.xml.gz"
+
+# Land -> vilka leverantörskategorier som hör dit (regex) och vilka källfiler som används.
+# Källorna står i prioritetsordning; per kanal väljs ändå den som räcker längst framåt.
+COUNTRIES = {
+    "se": {"cats": r"^SWEDEN ", "iptvepg": ["se"], "epgshare": ["SE1"]},
+    "no": {"cats": r"^NORWAY ", "iptvepg": ["no"], "epgshare": ["NO1"]},
+    "dk": {"cats": r"^DENMARK ", "iptvepg": ["dk"], "epgshare": ["DK1"]},
+    "fi": {"cats": r"^(FINLAND |FI\|)", "iptvepg": ["fi"], "epgshare": ["FI1"]},
+    "uk": {"cats": r"^UK\|", "iptvepg": ["gb"], "epgshare": ["UK1"]},
+    "ie": {"cats": r"^IR\| IRELAND", "iptvepg": ["gb"], "epgshare": ["IE1", "UK1"]},
+    "de": {"cats": r"^DE\|", "iptvepg": ["de"], "epgshare": ["DE1"]},
+    "at": {"cats": r"^AT\|", "iptvepg": ["at", "de"], "epgshare": ["AT1", "DE1"]},
+    "ch": {"cats": r"^CH\| (SWITZERLAND|DAZN|SFL)", "iptvepg": ["ch", "de"], "epgshare": ["CH1", "DE1"]},
+    "fr": {"cats": r"^FR\|", "iptvepg": ["fr"], "epgshare": ["FR1"]},
+    "be": {"cats": r"^BE\|", "iptvepg": ["be", "nl", "fr"], "epgshare": ["BE2", "NL1", "FR1"]},
+    "nl": {"cats": r"^(NL\||EU\| NETHERLANDS)", "iptvepg": ["nl"], "epgshare": ["NL1"]},
+    "lu": {"cats": r"^EU\| LUXEMBOURG", "iptvepg": ["lu"], "epgshare": ["LU1"]},
+    "es": {"cats": r"^ES\|", "iptvepg": ["es"], "epgshare": ["ES1"]},
+    "pt": {"cats": r"^PT\|", "iptvepg": ["pt"], "epgshare": ["PT1"]},
+    "it": {"cats": r"^IT\|", "iptvepg": ["it"], "epgshare": ["IT1"]},
+    "gr": {"cats": r"^(GR|CY)\|", "iptvepg": ["gr"], "epgshare": ["GR1", "CY1"]},
+    "mt": {"cats": r"^MT\|", "iptvepg": ["mt"], "epgshare": ["MT1"]},
+    "pl": {"cats": r"^PL\|", "iptvepg": ["pl"], "epgshare": ["PL1"]},
+    "cz": {"cats": r"^CZ\|", "iptvepg": ["cz"], "epgshare": ["CZ1", "SK1"]},
+    "hu": {"cats": r"^HU\|", "iptvepg": ["hu"], "epgshare": ["HU1"]},
+    "ro": {"cats": r"^RO\|", "iptvepg": ["ro"], "epgshare": ["RO1", "RO2"]},
+    "bg": {"cats": r"^BG\|", "iptvepg": ["bg"], "epgshare": ["BG1"]},
+    "hr": {"cats": r"^HR\|", "iptvepg": ["hr"], "epgshare": ["HR1"]},
+    "rs": {"cats": r"^(RS|CG)\|", "iptvepg": ["rs", "me"], "epgshare": ["RS1"]},
+    "ba": {"cats": r"^BH\|", "iptvepg": ["ba"], "epgshare": ["BA1"]},
+    "exyu": {"cats": r"^EXYU\|", "iptvepg": ["rs", "hr", "ba"], "epgshare": ["RS1", "HR1", "BA1"]},
+    "mk": {"cats": r"^MK\|", "iptvepg": ["mk"], "epgshare": []},
+    "si": {"cats": r"^SL\|", "iptvepg": ["si"], "epgshare": []},
+    "al": {"cats": r"^(AL|KO)\|", "iptvepg": ["al"], "epgshare": ["AL1"]},
+    "lv": {"cats": r"^LA\|", "iptvepg": ["lv"], "epgshare": ["LV1"]},
+    "lt": {"cats": r"^LT\|", "iptvepg": ["lt"], "epgshare": ["LT1"]},
+    "ua": {"cats": r"^UKR\|", "iptvepg": ["ua"], "epgshare": ["UA1"]},
+    "by": {"cats": r"^BY\|", "iptvepg": ["by"], "epgshare": []},
+    "ru": {"cats": r"^RU\|", "iptvepg": ["ru"], "epgshare": []},
+    "tr": {"cats": r"^TR\|", "iptvepg": ["tr"], "epgshare": ["TR1", "TR3"]},
+    "us": {"cats": r"^US\|", "iptvepg": ["us"], "epgshare": ["US2", "US_LOCALS1", "US_SPORTS1"]},
+    "ca": {"cats": r"^CA\|", "iptvepg": ["ca"], "epgshare": ["CA2", "US2"]},
+}
+
+# Kategorier utan riktig tablå (evenemang, 24/7-loopar, radio, repriser …).
+SKIP_CATS = re.compile(
+    r"PPV|24/7|24-7|RADIO|REPLAY|REPETICI|EVENT|ONBOARD|SERIES|PACKAGE|PLAY\b|PLAYER|"
+    r"PRIME|NETFLIX|TUBI|PLUTO|CINEMANIA|ESPN PLUS|FLO |STORE|RED BUTTON|TEAM|"
+    r"LEAGUE ONE|LEAGUE TWO|CHAMPIONSHIP|NATIONAL LEAGUE|VIDIO|MC VIDEO|SDAROT|CONCERTS",
+    re.I)
+
+
+def sources_for(country):
+    """[(nyckel, url)] för ett land."""
+    cfg = COUNTRIES[country]
+    return ([(f"iptvepg-{c}", IPTVEPG.format(c)) for c in cfg["iptvepg"]] +
+            [(f"epgshare-{c}", EPGSHARE.format(c)) for c in cfg["epgshare"]])
+
+
+def all_sources():
+    seen = {}
+    for c in COUNTRIES:
+        for key, url in sources_for(c):
+            seen.setdefault(key, url)
+    return seen
 
 
 def download(url, dest):
+    """Laddar ner (och packar upp) en XMLTV-fil till disk utan att hålla allt i minnet."""
     req = urllib.request.Request(url, headers={"User-Agent": UA})
-    with urllib.request.urlopen(req, timeout=300) as r:
-        data = r.read()
-    if data[:2] == b"\x1f\x8b":
-        data = gzip.decompress(data)
-    if not data.lstrip().startswith(b"<"):
-        raise RuntimeError(f"{url} gav inte XML")
-    dest.write_bytes(data)
+    tmp = dest.with_suffix(".part")
+    with urllib.request.urlopen(req, timeout=600) as r, open(tmp, "wb") as f:
+        shutil.copyfileobj(r, f, 1 << 20)
+    with open(tmp, "rb") as f:
+        gz = f.read(2) == b"\x1f\x8b"
+    if gz:
+        with gzip.open(tmp) as src, open(dest, "wb") as f:
+            shutil.copyfileobj(src, f, 1 << 20)
+        tmp.unlink()
+    else:
+        tmp.replace(dest)
+    with open(dest, "rb") as f:
+        if not f.read(200).lstrip(b"\xef\xbb\xbf \t\r\n").startswith(b"<"):
+            raise RuntimeError(f"{url} gav inte XML")
 
 
-_QUALITY = r"\b(fhd|uhd|hd|sd|hevc|h265|4k\+?|raw|50fps|60fps)\b"
+SOURCE_PREFIX = re.compile(r"^([A-Z]{2,3} - |\[[^\]]+\]\s*)")
+_QUALITY = (r"\b(fhd|uhd|hd|sd|lq|low|hevc|h265|4k\+?|8k|raw|gold|vip|super|backup|"
+            r"\d{3,4}p|480|720|1080|50fps|60fps)\b")
 
 
 def norm(name):
     """'SWE| TV 4 HITS HD' -> 'tv4hits'"""
     name = (name or "").replace("\\u0026", "&")
-    s = unicodedata.normalize("NFKD", name or "").encode("ascii", "ignore").decode().lower()
-    s = re.sub(r"^[a-z]{2,4}\s*[|:]\s*", "", s)          # 'swe| '
-    s = re.sub(r"\.(se|dk|no|fi)$", "", s)               # id-suffix
-    s = s.replace("&", " and ")
+    s = unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode().lower()
+    s = re.sub(r"^[a-z0-9+\- ]{1,12}[|:]\s*", "", s)    # 'swe| ', 'uk-nowtv| '
+    s = re.sub(r"\.[a-z]{2}(@\w+)?$", "", s)              # id-suffix '.se'
+    s = s.replace("&", " and ").replace("+", " plus ")
+    s = re.sub(r"\(.*?\)|\[.*?\]", " ", s)
     s = re.sub(_QUALITY, " ", s)
-    return re.sub(r"[^a-z0-9]", "", s)
+    s = re.sub(r"[^a-z0-9]", "", s)
+    return re.sub(r"^bbc([1-4])", lambda m: "bbc" + ["one", "two", "three", "four"][int(m[1]) - 1], s)
+
+
+_CALL_WORDS = {"WEST", "WILD", "KIDS", "WORLD", "WOMEN", "WINE", "WAVE", "CITY", "CINE", "CLUB",
+               "COZI", "CNBC", "CPAC", "CRIME", "COMEDY", "KIDZ", "WOW", "CBS", "CNN", "CMT"}
+
+
+def callsigns_in_name(name):
+    """Anropssignaler i ett leverantörsnamn: 'US| NBC 10 PHILADELPHIA PA (WCAU)' -> {'WCAU'}"""
+    out = set()
+    for tok in re.findall(r"[A-Z0-9\-]+", name.upper()):
+        m = re.fullmatch(r"([KWC][A-Z]{2,3})(-[A-Z0-9]+)?", tok)
+        if m and m[1] not in _CALL_WORDS:
+            out.add(m[1])
+    return out
+
+
+def callsign_of_id(cid):
+    """Anropssignal ur ett käll-id: 'WCAU-DT.us_locals1' / 'NBCWCAU.us' -> 'WCAU'"""
+    base = re.split(r"[.]", cid or "")[0].upper()
+    base = re.sub(r"-(DT|TV|LD|CD|LP|D|TDT)\d*$", "", base)
+    m = re.fullmatch(r"(?:ABC|CBS|NBC|FOX|CW|MNT|MYNETWORK|PBS|ION|TELEMUNDO|UNIVISION|CTV|CBC|GLOBAL|CITY)?"
+                     r"([KWC][A-Z]{2,3})", base)
+    return m[1] if m and m[1] not in _CALL_WORDS else None
