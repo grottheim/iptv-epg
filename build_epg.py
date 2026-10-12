@@ -15,7 +15,9 @@ from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from epgcommon import ROOT, all_sources, download
+import re
+
+from epgcommon import ROOT, all_sources, download, norm
 
 # Programdelar som behålls; resten (medverkande, bilder, betyg …) tas bort för att hålla nere storleken.
 KEEP = {"title", "sub-title", "desc", "category", "episode-num", "date", "new", "live", "premiere"}
@@ -24,6 +26,52 @@ BASE_URL = "https://grottheim.github.io/iptv-epg/"
 # eftersom UHF inte kan koppla dem på annat sätt.
 EXTRA_ID_COUNTRIES = {"se"}
 EPOCH = datetime.min.replace(tzinfo=timezone.utc)
+
+
+# Kanaler som sänder på engelska. Utanför engelskspråkiga länder väljs för dem en källa med engelsk text.
+ENGLISH_RX = re.compile(
+    r"^(cnn|bbc|skynews|aljazeeraenglish|cnbc|bloomberg|dw(english)?$|france24english|cgtn|nhkworld|trtworld|"
+    r"i24newsen|euronewsenglish|discovery|investigationdiscovery|id$|nationalgeographic|natgeo|history|h2$|"
+    r"animalplanet|tlc|travelchannel|foodnetwork|horseandcountry|mtv|vh1|fashiontv|ftv$)")
+ENGLISH_COUNTRIES = {"uk", "ie", "us", "ca", "hockey"}
+MIN_ENGLISH_HOURS = 48
+PLACEHOLDERS = {"no data", "no information", "ingen information", "to be announced", "tba", ""}
+EN_STOP = set("the and of to in is with for on his her their from this that are was who an".split())
+OTHER_STOP = set("och är att med för på av som det ett til og er af der die und den das ist nicht het een van "
+                 "le la les des et est pour il el los las del que por di che non per ja ei".split())
+
+
+def is_english(plist):
+    """Avgör språket på programtexterna (källornas lang-märkning är opålitlig)."""
+    words = re.findall(r"[a-zåäöæøéü]+", " ".join(
+        (x.findtext("title") or "") + " " + (x.findtext("desc") or "") for x in plist[:60]).lower())
+    if len(words) < 40:
+        return False
+    en = sum(w in EN_STOP for w in words)
+    other = sum(w in OTHER_STOP for w in words)
+    return en > 2 * other and en / len(words) > 0.03
+
+
+def last_stop(plist):
+    return max((parse_time(x.get("stop")) for x in plist), default=EPOCH)
+
+
+def pick(t, progs, now):
+    """Väljer program för en kanal: den källa som räcker längst, eller för engelska kanaler
+    en källa med engelsk text (kompletterad med den längsta källan efter att den tar slut)."""
+    cands = [progs.get(tuple(s), []) for s in t["sources"]]
+    best = max(cands, key=last_stop)
+    if t["country"] in ENGLISH_COUNTRIES or not ENGLISH_RX.match(norm(t["name"])):
+        return best
+    english = [c for c in cands if c and is_english(c)
+               and (last_stop(c) - now).total_seconds() >= MIN_ENGLISH_HOURS * 3600]
+    if not english:
+        return best
+    en = max(english, key=last_stop)
+    if en is best:
+        return best
+    end = last_stop(en)
+    return en + [x for x in best if parse_time(x.get("start")) >= end]
 
 
 def parse_time(s):
@@ -85,7 +133,8 @@ def main():
                         cid = el.get("channel")
                         start, stop = parse_time(el.get("start")), parse_time(el.get("stop"))
                         if (cid in wanted[key] and start and stop
-                                and stop > start_cut and start < end_cut):
+                                and stop > start_cut and start < end_cut
+                                and (el.findtext("title") or "").strip().lower() not in PLACEHOLDERS):
                             for child in list(el):
                                 if child.tag not in KEEP:
                                     el.remove(child)
@@ -104,8 +153,7 @@ def main():
     by_country = defaultdict(lambda: ([], []))
     empty = 0
     for tid, t in mapping.items():
-        best = max((progs.get(tuple(s), []) for s in t["sources"]),
-                   key=lambda p: max((parse_time(x.get("stop")) for x in p), default=EPOCH))
+        best = pick(t, progs, now)
         if not best:
             empty += 1
             continue
