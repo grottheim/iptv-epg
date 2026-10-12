@@ -5,3 +5,4 @@ __pycache__/
 .DS_Store
 docs/*.xml.gz
 docs/index.html
+serve/
