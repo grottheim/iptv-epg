@@ -2,7 +2,7 @@
 """Bygger sammanslagna XMLTV-filer utifrån mapping.json. Behöver inga inloggningsuppgifter.
 
 För varje kanal väljs den källa som räcker längst framåt i tiden. Resultatet blir en fil
-per land (docs/epg-<land>.xml.gz) plus en fil med allt (docs/epg.xml.gz).
+per land (docs/epg-<land>.xml.gz) plus en fil med allt (docs/epg-alla.xml.gz).
 
 Användning:  python3 build_epg.py [--days 7] [--out docs]
 """
@@ -53,7 +53,7 @@ def write_index(out, counts):
 table{{border-collapse:collapse}}td,th{{padding:4px 10px;text-align:left}}code{{font-size:13px}}</style>
 <h1>IPTV EPG</h1><p>Uppdaterad {stamp}. Lägg in adressen för de länder du tittar på som EPG-källa i UHF.</p>
 <table><tr><th>Land</th><th>Kanaler</th><th>Adress</th><th>Storlek</th></tr>{rows}</table>
-<p>Allt i en fil (tung): <code>{BASE_URL}epg.xml.gz</code></p>""", encoding="utf-8")
+<p>Allt i en fil (tung): <code>{BASE_URL}epg-alla.xml.gz</code></p>""", encoding="utf-8")
 
 
 def main():
@@ -130,7 +130,10 @@ def main():
         write_xmltv(out / f"epg-{country}.xml.gz", chans, plist)
         all_ch += chans
         all_pr += plist
-    write_xmltv(out / "epg.xml.gz", all_ch, all_pr)
+    write_xmltv(out / "epg-alla.xml.gz", all_ch, all_pr)
+    # Den ursprungliga adressen behålls för Sverige, så att befintliga UHF-inställningar fortsätter fungera.
+    if "se" in by_country:
+        write_xmltv(out / "epg.xml.gz", *by_country["se"])
 
     write_index(out, {c: len(v[0]) for c, v in by_country.items()})
     print(f"\n{len(all_ch)} kanaler, {len(all_pr)} program ({empty} kanaler utan data just nu)")
