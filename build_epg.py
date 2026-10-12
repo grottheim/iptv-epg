@@ -20,6 +20,9 @@ from epgcommon import ROOT, all_sources, download
 # Programdelar som behålls; resten (medverkande, bilder, betyg …) tas bort för att hålla nere storleken.
 KEEP = {"title", "sub-title", "desc", "category", "episode-num", "date", "new", "live", "premiere"}
 BASE_URL = "https://grottheim.github.io/iptv-epg/"
+# Länder där kanaler utan EPG-id hos leverantören även läggs in med strömmens namn och nummer som id,
+# eftersom UHF inte kan koppla dem på annat sätt.
+EXTRA_ID_COUNTRIES = {"se"}
 EPOCH = datetime.min.replace(tzinfo=timezone.utc)
 
 
@@ -120,6 +123,18 @@ def main():
             p.set("_used", "1")
             p.set("channel", tid)
             plist.append(p)
+
+        if t["country"] in EXTRA_ID_COUNTRIES:
+            for alt in t.get("names", []) + t.get("stream_ids", []):
+                ach = ET.Element("channel", {"id": alt})
+                ET.SubElement(ach, "display-name").text = alt
+                ach.tail = "\n"
+                chans.append(ach)
+                for p in best:
+                    c = ET.fromstring(ET.tostring(p))
+                    c.set("channel", alt)
+                    c.attrib.pop("_used", None)
+                    plist.append(c)
 
     for _, plist in by_country.values():
         for p in plist:

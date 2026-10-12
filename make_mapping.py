@@ -128,6 +128,8 @@ def main():
             t["streams"] += 1
             if not eid and name not in t.setdefault("names", []):
                 t["names"].append(name)          # exakta leverantörsnamn för namnmatchning i UHF
+            if not eid:
+                t.setdefault("stream_ids", []).append(str(s["stream_id"]))
         print(f"   {dict(stat)}")
 
     out.write_text(json.dumps(targets, ensure_ascii=False, indent=1))
