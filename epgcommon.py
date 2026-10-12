@@ -126,23 +126,36 @@ def norm(name):
 
 
 _CALL_WORDS = {"WEST", "WILD", "KIDS", "WORLD", "WOMEN", "WINE", "WAVE", "CITY", "CINE", "CLUB",
-               "COZI", "CNBC", "CPAC", "CRIME", "COMEDY", "KIDZ", "WOW", "CBS", "CNN", "CMT"}
+               "COZI", "CNBC", "CPAC", "CRIME", "COMEDY", "KIDZ", "WOW", "CBS", "CNN", "CMT", "CBSN"}
+NETWORKS = ["ABC", "CBS", "NBC", "FOX", "CW", "MNT", "MYNETWORK", "PBS", "ION", "TELEMUNDO", "UNIVISION",
+            "UNIMAS", "CTV", "CBC", "GLOBAL", "CITYTV", "GRIT", "REWIND", "METV", "COZI", "ANTENNA", "BOUNCE",
+            "ESTRELLA", "AZTECA", "COMET", "CHARGE", "LAFF", "DABL", "START", "QUEST", "TBD", "INDEPENDENT"]
+_NET_RX = re.compile(r"\b(" + "|".join(NETWORKS) + r"|MY NETWORK)\b")
 
 
-def callsigns_in_name(name):
-    """Anropssignaler i ett leverantörsnamn: 'US| NBC 10 PHILADELPHIA PA (WCAU)' -> {'WCAU'}"""
-    out = set()
-    for tok in re.findall(r"[A-Z0-9\-]+", name.upper()):
-        m = re.fullmatch(r"([KWC][A-Z]{2,3})(-[A-Z0-9]+)?", tok)
-        if m and m[1] not in _CALL_WORDS:
-            out.add(m[1])
-    return out
+def stations_in_name(name):
+    """Nätverk och stationer i ett leverantörsnamn.
+    'US| CW 6 SAN DIEGO CA (KFMB)' -> ('CW', [('KFMB', None)]);  '... (WSVN-D2)' -> ('ABC', [('WSVN', 2)])"""
+    up = name.upper()
+    m = _NET_RX.search(up)
+    net = ("MNT" if m[1] in ("MY NETWORK", "MYNETWORK") else m[1]) if m else None
+    found = []
+    for tok in re.findall(r"[A-Z0-9\-]+", up):
+        t = re.fullmatch(r"([KWC][A-Z]{2,3})(?:-(?:DT|TV|LD|CD|LP|D)(\d*))?", tok)
+        if t and t[1] not in _CALL_WORDS and t[1] not in NETWORKS:
+            found.append((t[1], int(t[2]) if t[2] else None))
+    return net, found
 
 
-def callsign_of_id(cid):
-    """Anropssignal ur ett käll-id: 'WCAU-DT.us_locals1' / 'NBCWCAU.us' -> 'WCAU'"""
-    base = re.split(r"[.]", cid or "")[0].upper()
-    base = re.sub(r"-(DT|TV|LD|CD|LP|D|TDT)\d*$", "", base)
-    m = re.fullmatch(r"(?:ABC|CBS|NBC|FOX|CW|MNT|MYNETWORK|PBS|ION|TELEMUNDO|UNIVISION|CTV|CBC|GLOBAL|CITY)?"
-                     r"([KWC][A-Z]{2,3})", base)
-    return m[1] if m and m[1] not in _CALL_WORDS else None
+def station_of_id(cid):
+    """(anropssignal, nätverk, sidokanal) ur ett käll-id, eller None.
+    'WSVN-DT2.us_locals1' -> ('WSVN', None, 2);  'ABCWSVNDT2.us' -> ('WSVN', 'ABC', 2);  'NBCWCAU.us' -> ('WCAU', 'NBC', 1)"""
+    base = (cid or "").split(".")[0]
+    m = re.fullmatch(r"([KWC][A-Z]{2,3})-(?:DT|TV|LD|CD|LP|D|TDT)(\d*)", base.upper())
+    if m:
+        return (m[1], None, int(m[2] or 1)) if m[1] not in _CALL_WORDS else None
+    m = re.fullmatch(r"([A-Za-z]*?)([KWC][A-Z]{2,3})(?:DT(\d+))?", base)
+    if m and m[2] not in _CALL_WORDS:
+        net = m[1].upper() or None
+        return m[2], ("MNT" if net == "MYNETWORK" else net), int(m[3] or 1)
+    return None
