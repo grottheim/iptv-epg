@@ -1,0 +1,5 @@
+.env
+cache/
+epg_rapport.csv
+__pycache__/
+.DS_Store
