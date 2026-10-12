@@ -44,9 +44,9 @@ def lan_address():
 def programme(channel, start, stop, title, desc=None):
     p = ET.Element("programme", {"start": start.strftime("%Y%m%d%H%M%S %z"),
                                  "stop": stop.strftime("%Y%m%d%H%M%S %z"), "channel": channel})
-    ET.SubElement(p, "title").text = title
+    ET.SubElement(p, "title", {"lang": "en"}).text = title
     if desc:
-        ET.SubElement(p, "desc").text = desc
+        ET.SubElement(p, "desc", {"lang": "en"}).text = desc
     ET.SubElement(p, "category").text = "Sport"
     p.tail = "\n"
     return p
@@ -130,13 +130,14 @@ def main():
                 gen_pr.append(programme(tid, day_start, day_start + timedelta(days=1), game[0]))
             elif game and game[1] + timedelta(hours=GAME_HOURS) > now - timedelta(hours=12):
                 title, start = game
-                gen_pr.append(programme(tid, min(day_start, start - timedelta(hours=12)), start, f"Inför: {title}",
-                                        f"Matchen börjar {start.astimezone(SE_TZ):%H:%M} svensk tid."))
+                local = start.astimezone(ET_TZ)
+                when = f"{local:%a %b %d}, {local:%I:%M %p}".replace(" 0", " ") + " ET"
+                gen_pr.append(programme(tid, min(day_start, start - timedelta(hours=12)), start,
+                                        f"Up next: {title}", f"Game starts {when}."))
                 gen_pr.append(programme(tid, start, start + timedelta(hours=GAME_HOURS), title,
-                                        f"Start {start.astimezone(SE_TZ):%a %H:%M} svensk tid "
-                                        f"(beräknad längd {GAME_HOURS} h)."))
+                                        f"NHL Hockey: {title}. Starts {when} (estimated {GAME_HOURS} h)."))
             else:                                  # tom kanal eller gammalt namn
-                gen_pr.append(programme(tid, day_start, day_start + timedelta(days=2), "Ingen match just nu"))
+                gen_pr.append(programme(tid, day_start, day_start + timedelta(days=2), "No game scheduled"))
 
     # Egen EPG-fil: de kopplade kanalernas tablåer från GitHub Pages plus de genererade matchtablåerna.
     tv = ET.Element("tv", {"generator-info-name": "IPTV EPG-fix"})
