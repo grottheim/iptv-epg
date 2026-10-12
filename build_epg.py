@@ -108,6 +108,8 @@ def main():
             continue
         ch = ET.Element("channel", {"id": tid})
         ET.SubElement(ch, "display-name").text = t["name"]
+        for alias in t.get("names", []):
+            ET.SubElement(ch, "display-name").text = alias
         ch.tail = "\n"
         chans, plist = by_country[t["country"]]
         chans.append(ch)

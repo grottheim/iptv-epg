@@ -126,6 +126,8 @@ def main():
             t = targets.setdefault(tid, {"name": re.sub(r"^[\w\-+]+\s*[|:]\s*", "", name).strip(),
                                          "country": country, "sources": found, "streams": 0})
             t["streams"] += 1
+            if not eid and name not in t.setdefault("names", []):
+                t["names"].append(name)          # exakta leverantörsnamn för namnmatchning i UHF
         print(f"   {dict(stat)}")
 
     out.write_text(json.dumps(targets, ensure_ascii=False, indent=1))
