@@ -97,6 +97,8 @@ def build_full_epg(gen_ch, gen_pr):
     n = 0
     with gzip.open(tmp, "wb", compresslevel=6) as out:
         out.write(b'<?xml version="1.0" encoding="utf-8"?>\n<tv generator-info-name="IPTV EPG proxy">\n')
+        for el in gen_ch:                          # kanalposter först, som i leverantörens EPG
+            out.write(ET.tostring(el, encoding="utf-8"))
         for c in epg_countries():
             url = BASE_URL + ("epg.xml.gz" if c == "se" else f"epg-{c}.xml.gz")
             try:
@@ -115,7 +117,7 @@ def build_full_epg(gen_ch, gen_pr):
                 n += 1
             except Exception as e:
                 print(f"VARNING: kunde inte hämta {url}: {e}")
-        for el in gen_ch + gen_pr:
+        for el in gen_pr:
             out.write(ET.tostring(el, encoding="utf-8"))
         out.write(b"</tv>\n")
     tmp.replace(SERVE / "epg-full.xml.gz")
@@ -209,7 +211,21 @@ def main():
     with gzip.open(tmp, "wb") as f:
         ET.ElementTree(tv).write(f, encoding="utf-8", xml_declaration=True)
     tmp.replace(SERVE / "epg-fix.xml.gz")
-    full = build_full_epg(gen_ch, gen_pr)
+    # En kanalpost per ström med exakt strömnamn, som i leverantörens egen EPG. UHF matchar på namnen,
+    # och varianter (HD, HEVC …) som saknar en egen post får annars en gissad, ofta felaktig tablå.
+    in_epg = category_matcher(epg_countries())
+    stream_ch = []
+    for s in streams:
+        name = s.get("name", "")
+        tid = (s.get("epg_channel_id") or "").strip() or proxy_ids.get(str(s["stream_id"]))
+        if tid and not name.startswith("#") and in_epg(cats.get(s.get("category_id"), "")):
+            ch = ET.Element("channel", {"id": tid})
+            ET.SubElement(ch, "display-name").text = name
+            if s.get("stream_icon"):
+                ET.SubElement(ch, "icon", {"src": s["stream_icon"]})
+            ch.tail = "\n"
+            stream_ch.append(ch)
+    full = build_full_epg(stream_ch + gen_ch, gen_pr)
     tmp = SERVE / "epg_ids.tmp"
     tmp.write_text(json.dumps(proxy_ids))
     tmp.replace(SERVE / "epg_ids.json")
