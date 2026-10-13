@@ -18,7 +18,7 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from analyze import api, load_env
-from epgcommon import ROOT, UA, category_matcher
+from epgcommon import COUNTRIES, ROOT, UA, category_matcher
 
 BASE_URL = "https://grottheim.github.io/iptv-epg/"
 PORT = 8765
@@ -35,7 +35,10 @@ GAME_HOURS = 3
 
 def lan_address():
     for iface in ("en0", "en1"):
-        r = subprocess.run(["ipconfig", "getifaddr", iface], capture_output=True, text=True)
+        try:
+            r = subprocess.run(["ipconfig", "getifaddr", iface], capture_output=True, text=True)
+        except FileNotFoundError:                  # inte macOS (t.ex. på servern)
+            break
         if r.stdout.strip():
             return r.stdout.strip()
     return "localhost"
@@ -92,6 +95,8 @@ def main():
     mapping = json.loads((ROOT / "mapping.json").read_text())
 
     in_countries = category_matcher(countries)
+    in_any_country = category_matcher(list(COUNTRIES))
+    proxy_ids = {}                                 # stream_id -> EPG-id, för Xtream-mellanhanden (alla länder)
     by_name = {}
     for tid, t in mapping.items():               # kategorifiltret avgör vilka länder som tas med
         for n in t.get("names", []):
@@ -115,11 +120,14 @@ def main():
         if name.startswith("#") or (s.get("epg_channel_id") or "").strip():
             continue
         tid = by_name.get(name)
+        if tid and in_any_country(group):
+            proxy_ids[str(s["stream_id"])] = tid
         if tid and in_countries(group):
             add(s, tid, group)
             used_ids.add(tid)
         elif "hockey" in countries and GAME_CATS.match(group) and (NHL_SLOT.match(name) or "VIAPLAY PPV" in name):
             tid = f"match{s['stream_id']}.hockey"
+            proxy_ids[str(s["stream_id"])] = tid
             add(s, tid, group)
             ch = ET.Element("channel", {"id": tid})
             ET.SubElement(ch, "display-name").text = name
@@ -162,11 +170,14 @@ def main():
     with gzip.open(tmp, "wb") as f:
         ET.ElementTree(tv).write(f, encoding="utf-8", xml_declaration=True)
     tmp.replace(SERVE / "epg-fix.xml.gz")
+    tmp = SERVE / "epg_ids.tmp"
+    tmp.write_text(json.dumps(proxy_ids))
+    tmp.replace(SERVE / "epg_ids.json")
     tmp = SERVE / "playlist.tmp"
     tmp.write_text("\n".join(lines) + "\n", encoding="utf-8")
     tmp.replace(SERVE / "playlist.m3u")
     print(f"{now:%Y-%m-%d %H:%M}  {len(used_ids)} kopplade EPG-id + {len(gen_ch)} matchkanaler, "
-          f"{len(progs) + len(gen_pr)} program  ({epg_url})")
+          f"{len(progs) + len(gen_pr)} program, {len(proxy_ids)} id till mellanhanden  ({epg_url})")
 
 
 if __name__ == "__main__":
