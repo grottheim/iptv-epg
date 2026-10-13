@@ -164,7 +164,7 @@ def main():
             add(s, tid, group)
             used_ids.add(tid)
         elif "hockey" in countries and GAME_CATS.match(group) and (NHL_SLOT.match(name) or "VIAPLAY PPV" in name):
-            tid = f"match{s['stream_id']}.hockey"
+            tid = f"nhlgame{s['stream_id']}.us"
             proxy_ids[str(s["stream_id"])] = tid
             add(s, tid, group)
             ch = ET.Element("channel", {"id": tid})
