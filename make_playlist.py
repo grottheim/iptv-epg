@@ -108,6 +108,11 @@ def build_full_epg(gen_ch, gen_pr):
                     for line in src:
                         if line.startswith((b"<?xml", b"<tv", b"<channel ")):
                             continue
+                        # Kategorier som "Hockey" på andra länders program får UHF att koppla kanaler den
+                        # känner igen med samma namn (t.ex. TV 4 Hockey) till fel tablå. Svenska kategorier
+                        # behålls, eftersom UHF färgar tablån efter dem.
+                        if c != "se" and line.lstrip().startswith(b"<category"):
+                            continue
                         if line.rstrip().endswith(b"</tv>"):  # sista programmet kan sluta på samma rad
                             line = line.rstrip()[:-len(b"</tv>")] + b"\n"
                         out.write(line)
