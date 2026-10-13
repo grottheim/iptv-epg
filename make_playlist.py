@@ -104,16 +104,13 @@ def build_full_epg(gen_ch, gen_pr):
             try:
                 req = urllib.request.Request(url, headers={"User-Agent": UA})
                 with urllib.request.urlopen(req, timeout=300) as r, gzip.GzipFile(fileobj=r) as src:
-                    head = src.read(4096)
-                    start = head.find(b">", head.find(b"<tv")) + 1
-                    tail = head[start:]
-                    while True:
-                        chunk = src.read(1 << 20)
-                        if not chunk:
-                            break
-                        out.write(tail)
-                        tail = chunk
-                    out.write(tail[:tail.rfind(b"</tv>")])
+                    # Bara programmen kopieras; kanalposterna skrivs ovan, en per ström.
+                    for line in src:
+                        if line.startswith((b"<?xml", b"<tv", b"<channel ")):
+                            continue
+                        if line.rstrip().endswith(b"</tv>"):  # sista programmet kan sluta på samma rad
+                            line = line.rstrip()[:-len(b"</tv>")] + b"\n"
+                        out.write(line)
                 n += 1
             except Exception as e:
                 print(f"VARNING: kunde inte hämta {url}: {e}")
@@ -217,10 +214,13 @@ def main():
     stream_ch = []
     for s in streams:
         name = s.get("name", "")
-        tid = (s.get("epg_channel_id") or "").strip() or proxy_ids.get(str(s["stream_id"]))
+        eid = (s.get("epg_channel_id") or "").strip()
+        tid = eid or proxy_ids.get(str(s["stream_id"]))
         if tid and not name.startswith("#") and in_epg(cats.get(s.get("category_id"), "")):
             ch = ET.Element("channel", {"id": tid})
-            ET.SubElement(ch, "display-name").text = name
+            # Kanaler som bara mellanhanden gett id får id:t som namn, så att UHF:s namnmatchning
+            # inte förväxlar dem med andra kanaler (t.ex. "UTAH HOCKEY CLUB" med TV 4 Hockey).
+            ET.SubElement(ch, "display-name").text = name if eid else tid
             if s.get("stream_icon"):
                 ET.SubElement(ch, "icon", {"src": s["stream_icon"]})
             ch.tail = "\n"
