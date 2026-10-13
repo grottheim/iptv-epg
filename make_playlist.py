@@ -83,6 +83,45 @@ def fetch_xmltv(url):
     return ET.fromstring(gzip.decompress(data) if data[:2] == b"\x1f\x8b" else data)
 
 
+def epg_countries():
+    """Länder vars hela tablå ska ingå i mellanhandens EPG (serve/epg_countries.txt, kommaseparerat)."""
+    f = SERVE / "epg_countries.txt"
+    text = f.read_text() if f.exists() else "se,hockey"
+    return [c.strip() for c in text.replace("\n", ",").split(",") if c.strip()]
+
+
+def build_full_epg(gen_ch, gen_pr):
+    """serve/epg-full.xml.gz: hela tablån för valda länder (från GitHub Pages) plus genererade NHL-tablåer.
+    Filerna kopieras som text utan att tolkas, så att det ryms i minnet även på en liten server."""
+    tmp = SERVE / "epg-full.tmp"
+    n = 0
+    with gzip.open(tmp, "wb", compresslevel=6) as out:
+        out.write(b'<?xml version="1.0" encoding="utf-8"?>\n<tv generator-info-name="IPTV EPG proxy">\n')
+        for c in epg_countries():
+            url = BASE_URL + ("epg.xml.gz" if c == "se" else f"epg-{c}.xml.gz")
+            try:
+                req = urllib.request.Request(url, headers={"User-Agent": UA})
+                with urllib.request.urlopen(req, timeout=300) as r, gzip.GzipFile(fileobj=r) as src:
+                    head = src.read(4096)
+                    start = head.find(b">", head.find(b"<tv")) + 1
+                    tail = head[start:]
+                    while True:
+                        chunk = src.read(1 << 20)
+                        if not chunk:
+                            break
+                        out.write(tail)
+                        tail = chunk
+                    out.write(tail[:tail.rfind(b"</tv>")])
+                n += 1
+            except Exception as e:
+                print(f"VARNING: kunde inte hämta {url}: {e}")
+        for el in gen_ch + gen_pr:
+            out.write(ET.tostring(el, encoding="utf-8"))
+        out.write(b"</tv>\n")
+    tmp.replace(SERVE / "epg-full.xml.gz")
+    return n
+
+
 def main():
     countries = sys.argv[1:] or ["se", "hockey"]
     env = load_env()
@@ -170,6 +209,7 @@ def main():
     with gzip.open(tmp, "wb") as f:
         ET.ElementTree(tv).write(f, encoding="utf-8", xml_declaration=True)
     tmp.replace(SERVE / "epg-fix.xml.gz")
+    full = build_full_epg(gen_ch, gen_pr)
     tmp = SERVE / "epg_ids.tmp"
     tmp.write_text(json.dumps(proxy_ids))
     tmp.replace(SERVE / "epg_ids.json")
@@ -177,7 +217,8 @@ def main():
     tmp.write_text("\n".join(lines) + "\n", encoding="utf-8")
     tmp.replace(SERVE / "playlist.m3u")
     print(f"{now:%Y-%m-%d %H:%M}  {len(used_ids)} kopplade EPG-id + {len(gen_ch)} matchkanaler, "
-          f"{len(progs) + len(gen_pr)} program, {len(proxy_ids)} id till mellanhanden  ({epg_url})")
+          f"{len(progs) + len(gen_pr)} program, {len(proxy_ids)} id till mellanhanden, "
+          f"full EPG med {full} länder  ({epg_url})")
 
 
 if __name__ == "__main__":

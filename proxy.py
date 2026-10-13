@@ -3,7 +3,7 @@
 
 - player_api.php?action=get_live_streams  -> leverantörens lista, med epg_channel_id ifyllt där det saknas
 - player_api.php (övrigt)                 -> vidarebefordras oförändrat
-- xmltv.php                               -> egen EPG (serve/epg-fix.xml.gz: genererade NHL-tablåer m.m.)
+- xmltv.php                               -> egen EPG (serve/epg-full.xml.gz: valda länder + NHL-tablåer)
 - /live/ /movie/ /series/ /timeshift/ …   -> omdirigeras till leverantören (videon går aldrig via mellanhanden)
 
 Bara det användarnamn som står i .env släpps igenom, så att servern inte blir en öppen proxy.
@@ -87,7 +87,9 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(302, extra={"Location": UPSTREAM + self.path})
 
         if url.path == "/xmltv.php":
-            epg = SERVE / "epg-fix.xml.gz"
+            epg = SERVE / "epg-full.xml.gz"
+            if not epg.exists():
+                epg = SERVE / "epg-fix.xml.gz"
             if not epg.exists():
                 return self.send(503, b"EPG not ready", "text/plain")
             return self.send(200, epg.read_bytes(), "application/xml", {"Content-Encoding": "gzip"})
