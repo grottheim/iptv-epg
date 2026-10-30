@@ -5,17 +5,20 @@
 - player_api.php (övrigt)                 -> vidarebefordras oförändrat
 - xmltv.php                               -> egen EPG (serve/epg-full.xml.gz: valda länder + NHL-tablåer)
 - /live/ /movie/ /series/ /timeshift/ …   -> omdirigeras till leverantören (videon går aldrig via mellanhanden)
+- NHL 01, NHL 02 …                        -> fasta kanaler som omdirigeras till kanalen med matchen (se nhl.py)
 
 Bara det användarnamn som står i .env släpps igenom, så att servern inte blir en öppen proxy.
 Användning:  python3 proxy.py [--port 8080]
 """
 import argparse
 import json
+import re
 import urllib.error
 import urllib.parse
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
+import nhl
 from analyze import load_env
 from epgcommon import ROOT, UA
 
@@ -84,7 +87,14 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(403, b'{"error":"forbidden"}')
 
         if url.path.startswith(REDIRECT_PREFIXES):
-            return self.send(302, extra={"Location": UPSTREAM + self.path})
+            path = self.path
+            virtual = re.fullmatch(r"(/live/[^/]+/[^/]+/)(99\d{7})(\.\w+)?", url.path)
+            if virtual:                            # fast NHL-kanal: skicka till kanalen som har matchen nu
+                real = nhl.resolve(virtual[2])
+                if not real:
+                    return self.send(404, b'{"error":"no source"}')
+                path = f"{virtual[1]}{real}{virtual[3] or ''}"
+            return self.send(302, extra={"Location": UPSTREAM + path})
 
         if url.path == "/xmltv.php":
             epg = SERVE / "epg-full.xml.gz"
@@ -95,8 +105,19 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(200, epg.read_bytes(), "application/xml", {"Content-Encoding": "gzip"})
 
         if url.path == "/player_api.php":
+            action = query.get("action", [""])[0]
+            category = query.get("category_id", [""])[0]
+            if action == "get_live_streams" and category in (nhl.CATEGORY_ID, nhl.CATEGORY_B):
+                only = [x for x in nhl.virtual_streams() if x["category_id"] == category]
+                return self.send(200, json.dumps(only).encode())
             status, body, ctype = self.upstream()
-            if status == 200 and query.get("action", [""])[0] == "get_live_streams":
+            if status == 200 and action == "get_live_categories":
+                try:
+                    body = json.dumps(nhl.virtual_categories() + json.loads(body),
+                                      ensure_ascii=False, separators=(",", ":")).encode()
+                except ValueError:
+                    pass
+            if status == 200 and action == "get_live_streams":
                 try:
                     streams = json.loads(body)
                     ids = Ids.get()
@@ -105,6 +126,8 @@ class Handler(BaseHTTPRequestHandler):
                             tid = ids.get(str(s.get("stream_id")))
                             if tid:
                                 s["epg_channel_id"] = tid
+                    if not category:
+                        streams = nhl.virtual_streams() + streams
                     body = json.dumps(streams, ensure_ascii=False, separators=(",", ":")).encode()
                     ctype = "application/json"
                 except ValueError:

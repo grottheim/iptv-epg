@@ -17,6 +17,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
+import nhl
 from analyze import api, load_env
 from epgcommon import COUNTRIES, ROOT, UA, category_matcher
 
@@ -65,7 +66,8 @@ def game_times(name, now):
                 dates.append(datetime.strptime(f"{m[3]} {year} {m[4]}", "%d %b %Y %H:%M").replace(tzinfo=SE_TZ))
             except ValueError:
                 pass
-        return f"{m[1].title()} – {m[2].title()}", min(dates, key=lambda d: abs(d - now))
+        start = min(dates, key=lambda d: abs(d - now))
+        return (f"{m[1].title()} – {m[2].title()}", start) if start < now + timedelta(days=7) else None
     m = NHL_SLOT.match(name)
     if m and m[4].strip():
         if not m[1]:
@@ -230,7 +232,12 @@ def main():
                 ET.SubElement(ch, "icon", {"src": s["stream_icon"]})
             ch.tail = "\n"
             stream_ch.append(ch)
-    full = build_full_epg(stream_ch + gen_ch, gen_pr)
+    try:
+        nhl_ch, nhl_pr = nhl.epg_elements()
+    except Exception as e:                         # NHL:s schema nere: bygg resten ändå
+        print(f"VARNING: NHL-schemat kunde inte hämtas: {e}")
+        nhl_ch, nhl_pr = [], []
+    full = build_full_epg(stream_ch + gen_ch + nhl_ch, gen_pr + nhl_pr)
     tmp = SERVE / "epg_ids.tmp"
     tmp.write_text(json.dumps(proxy_ids))
     tmp.replace(SERVE / "epg_ids.json")
