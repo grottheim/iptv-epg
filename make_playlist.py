@@ -95,14 +95,14 @@ def epg_countries():
 def copy_tv_programmes(out):
     """Tablåerna för tv-kanalerna i gruppen "NHL - TV-KANALER", ur USA:s och Kanadas filer.
     Bara de kanalernas program kopieras, så att EPG:n inte blir för tung för Apple TV."""
-    tv = nhl.stored().get("tv", [])
-    wanted = {t["epg"] for t in tv if t["epg"]}
+    tv = [t for t in nhl.stored().get("tv", []) if t["epg"] and t.get("tvg")]
+    wanted = {}                                    # leverantörens EPG-id -> tv-gruppens egna id
     for t in tv:
-        if t["epg"]:
-            ch = ET.Element("channel", {"id": t["epg"]})
-            ET.SubElement(ch, "display-name").text = t["name"]
-            ch.tail = "\n"
-            out.write(ET.tostring(ch, encoding="utf-8"))
+        wanted.setdefault(t["epg"], []).append(t["tvg"])
+        ch = ET.Element("channel", {"id": t["tvg"]})
+        ET.SubElement(ch, "display-name").text = t["tvg"]   # neutralt namn, som för NHL 01 …
+        ch.tail = "\n"
+        out.write(ET.tostring(ch, encoding="utf-8"))
     n = 0
     for c in ("us", "ca"):
         if c in epg_countries():
@@ -113,9 +113,10 @@ def copy_tv_programmes(out):
             with urllib.request.urlopen(req, timeout=300) as r, gzip.GzipFile(fileobj=r) as src:
                 for _, el in ET.iterparse(src):
                     if el.tag == "programme":
-                        if el.get("channel") in wanted:
+                        for tvg in wanted.get(el.get("channel"), []):
                             for child in el.findall("category"):
                                 el.remove(child)
+                            el.set("channel", tvg)
                             el.tail = "\n"
                             out.write(ET.tostring(el, encoding="utf-8"))
                         el.clear()

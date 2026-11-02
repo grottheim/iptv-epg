@@ -99,7 +99,7 @@ def find_tv(streams, cats):
                                              "RAW" in clean(s["name"]), len(s["name"])))
             out.append({"id": TV_BASE_ID + i, "real": best["stream_id"], "name": best["name"].strip(),
                         "epg": (best.get("epg_channel_id") or "").strip(), "icon": best.get("stream_icon") or "",
-                        "codes": list(codes)})
+                        "codes": list(codes), "tvg": f"nhltv{i:02d}.tv"})
     return out
 
 
@@ -109,7 +109,8 @@ def virtual_streams():
     for tv in stored().get("tv", []):
         out.append({
             "num": tv["id"], "name": tv["name"], "stream_type": "live", "stream_id": tv["id"],
-            "stream_icon": tv["icon"], "epg_channel_id": tv["epg"], "added": "0", "is_adult": 0,
+            # Eget EPG-id: med samma id som leverantörens exemplar av kanalen visar UHF tablån bara på ett av dem.
+            "stream_icon": tv["icon"], "epg_channel_id": tv.get("tvg", tv["epg"]), "added": "0", "is_adult": 0,
             "category_id": CATEGORY_TV, "category_ids": [int(CATEGORY_TV)], "custom_sid": "",
             "tv_archive": 0, "direct_source": "", "tv_archive_duration": 0,
         })
