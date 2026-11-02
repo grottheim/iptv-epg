@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Fasta NHL-kanaler: NHL 01, NHL 02 … med tablå från NHL:s officiella spelschema.
+"""NHL-kanaler med tablå från NHL:s officiella spelschema.
 
 Matcherna ligger hos leverantören på kanaler vars namn byts varje dag. Det här skriptet letar upp
 kanalerna som har dagens matcher och skriver serve/nhl.json (virtuell kanal -> riktig kanal), som
-mellanhanden använder vid uppspelning. Varje match får en huvudkanal och två reserver (B och C).
+mellanhanden använder vid uppspelning. Varje match får en huvudkanal och upp till fyra alternativ, döpta
+efter de kanaler de visar.
 
 Körs av en timer på servern.  Användning:  python3 nhl.py
 """
@@ -25,7 +26,7 @@ CATEGORY_ID, CATEGORY_B, CATEGORY_TV = "990001", "990002", "990003"
 TV_BASE_ID = 991000000
 MAX_GAMES = 16                                  # NHL har 32 lag
 BASE_ID = 990000000
-VARIANTS = ["", " B", " C"]
+MAX_SOURCES = 5                                 # huvudkanal + upp till fyra alternativ per match
 GAME_HOURS = 3.5
 DAY_START_UTC = 10                              # ett NHL-dygn räknas från kl. 10 UTC, då inga matcher pågår
 SE_TZ = ZoneInfo("Europe/Stockholm")
@@ -104,7 +105,7 @@ def find_tv(streams, cats):
 
 
 def virtual_streams():
-    """Kanallistans poster för de fasta kanalerna. Namnen ändras aldrig; tablån visar matchen."""
+    """Kanallistans poster för NHL-grupperna."""
     out = []
     for tv in stored().get("tv", []):
         out.append({
@@ -114,12 +115,15 @@ def virtual_streams():
             "category_id": CATEGORY_TV, "category_ids": [int(CATEGORY_TV)], "custom_sid": "",
             "tv_archive": 0, "direct_source": "", "tv_archive_duration": 0,
         })
-    for slot in range(1, MAX_GAMES + 1):
-        for v, suffix in enumerate(VARIANTS):
+    # Dagens matcher: kanalerna heter som den kanal de visar; tablån (NHL:s schema) visar matchen.
+    # Huvudkanalen ligger i "DAGENS MATCHER", alternativen i "RESERVKANALER".
+    for g in stored().get("games", []):
+        names = g.get("sources") or [f'Ingen kanal hittad: {g["game"]}']
+        for v, name in enumerate(names[:MAX_SOURCES]):
             category = CATEGORY_B if v else CATEGORY_ID
             out.append({
-                "num": virtual_id(slot, v), "name": f"NHL {slot:02d}{suffix}", "stream_type": "live",
-                "stream_id": virtual_id(slot, v), "stream_icon": "", "epg_channel_id": epg_id(slot),
+                "num": virtual_id(g["slot"], v), "name": name.strip(), "stream_type": "live",
+                "stream_id": virtual_id(g["slot"], v), "stream_icon": "", "epg_channel_id": epg_id(g["slot"]),
                 "added": "0", "is_adult": 0, "category_id": category, "category_ids": [int(category)],
                 "custom_sid": "", "tv_archive": 0, "direct_source": "", "tv_archive_duration": 0,
             })
@@ -213,7 +217,7 @@ def sources_for(game, streams, cats, tv=()):
         full = clean(f'{team["placeName"]["default"]} {team["commonName"]["default"]}')
         picked += [s for s in streams if s.get("name", "").startswith("NHL TEAM|")
                    and clean(s["name"].split("|", 1)[1]) == full]
-    return picked[:len(VARIANTS)]
+    return picked[:MAX_SOURCES]
 
 
 def title_of(game):
