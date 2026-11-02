@@ -30,6 +30,7 @@ MAX_SOURCES = 5                                 # huvudkanal + upp till fyra alt
 GAME_HOURS = 3.5
 DAY_START_UTC = 10                              # ett NHL-dygn räknas från kl. 10 UTC, då inga matcher pågår
 SE_TZ = ZoneInfo("Europe/Stockholm")
+HISTORY_DAYS = 3                                # så många dygns kopplingar sparas, för catch-up
 
 # Andra namn på lagen än de NHL:s schema anger.
 EXTRA_NAMES = {
@@ -89,6 +90,18 @@ def stored():
         return {}
 
 
+def archive_days(stream):
+    """Antal dygn catch-up som leverantören har för en kanal (0 = ingen)."""
+    try:
+        return int(stream.get("tv_archive_duration") or 0) if str(stream.get("tv_archive")) == "1" else 0
+    except ValueError:
+        return 0
+
+
+def archive_fields(days):
+    return {"tv_archive": 1 if days else 0, "tv_archive_duration": days or 0}
+
+
 def find_tv(streams, cats):
     """Leverantörens kanal för varje tv-kanal i TV_CHANNELS: helst med EPG-id och i HD."""
     out = []
@@ -96,11 +109,11 @@ def find_tv(streams, cats):
         cands = [s for s in streams if re.search(rx, s.get("name", "").strip())
                  and not re.search(r"PPV|PACKAGE", cats.get(s.get("category_id"), ""))]
         if cands:
-            best = min(cands, key=lambda s: (not (s.get("epg_channel_id") or "").strip(),
+            best = min(cands, key=lambda s: (not (s.get("epg_channel_id") or "").strip(), not archive_days(s),
                                              "RAW" in clean(s["name"]), len(s["name"])))
             out.append({"id": TV_BASE_ID + i, "real": best["stream_id"], "name": best["name"].strip(),
                         "epg": (best.get("epg_channel_id") or "").strip(), "icon": best.get("stream_icon") or "",
-                        "codes": list(codes), "tvg": f"nhltv{i:02d}.tv"})
+                        "codes": list(codes), "tvg": f"nhltv{i:02d}.tv", "archive": archive_days(best)})
     return out
 
 
@@ -113,26 +126,31 @@ def virtual_streams():
             # Eget EPG-id: med samma id som leverantörens exemplar av kanalen visar UHF tablån bara på ett av dem.
             "stream_icon": tv["icon"], "epg_channel_id": tv.get("tvg", tv["epg"]), "added": "0", "is_adult": 0,
             "category_id": CATEGORY_TV, "category_ids": [int(CATEGORY_TV)], "custom_sid": "",
-            "tv_archive": 0, "direct_source": "", "tv_archive_duration": 0,
+            "direct_source": "", **archive_fields(tv.get("archive", 0)),
         })
     # Dagens matcher: kanalerna heter som den kanal de visar; tablån (NHL:s schema) visar matchen.
     # Huvudkanalen ligger i "DAGENS MATCHER", alternativen i "RESERVKANALER".
     for g in stored().get("games", []):
         names = g.get("sources") or [f'Ingen kanal hittad: {g["game"]}']
+        archive = g.get("archive", [])
         for v, name in enumerate(names[:MAX_SOURCES]):
             category = CATEGORY_B if v else CATEGORY_ID
             out.append({
                 "num": virtual_id(g["slot"], v), "name": name.strip(), "stream_type": "live",
                 "stream_id": virtual_id(g["slot"], v), "stream_icon": "", "epg_channel_id": epg_id(g["slot"]),
                 "added": "0", "is_adult": 0, "category_id": category, "category_ids": [int(category)],
-                "custom_sid": "", "tv_archive": 0, "direct_source": "", "tv_archive_duration": 0,
+                "custom_sid": "", "direct_source": "", **archive_fields(archive[v] if v < len(archive) else 0),
             })
     return out
 
 
-def resolve(stream_id):
-    """Riktig kanal för en virtuell kanal, eller None om ingen källa finns just nu."""
-    return stored().get("map", {}).get(str(stream_id))
+def resolve(stream_id, when=None):
+    """Riktig kanal för en virtuell kanal, eller None. Med `when` (catch-up) används kopplingen för det
+    NHL-dygnet, så att en match från i går spelas från kanalen som visade den."""
+    data = stored()
+    if when is not None and int(stream_id) < TV_BASE_ID:   # tv-kanalerna är alltid samma kanal
+        return data.get("history", {}).get(hockey_date(when), {}).get(str(stream_id))
+    return data.get("map", {}).get(str(stream_id))
 
 
 def hockey_date(now=None):
@@ -232,7 +250,9 @@ def broadcast_text(game, tv):
 
 def epg_elements(schedule=None):
     """(kanalposter, programposter) för de fasta kanalerna, för hela veckans spelschema."""
-    schedule = schedule or fetch_schedule(hockey_date())
+    if schedule is None:                         # i går också, så att tablån räcker för catch-up
+        yesterday = (datetime.fromisoformat(hockey_date()) - timedelta(days=1)).date().isoformat()
+        schedule = {**fetch_schedule(yesterday), **fetch_schedule(hockey_date())}
     tv = stored().get("tv", [])
     channels = []
     for slot in range(1, MAX_GAMES + 1):
@@ -284,8 +304,12 @@ def build(streams, cats, schedule=None):
         for v, s in enumerate(sources):
             mapping[str(virtual_id(slot, v))] = s["stream_id"]
         report.append({"slot": slot, "game": title_of(game), "start": game["startTimeUTC"],
-                       "sources": [s["name"] for s in sources]})
-    return {"date": hockey_date(), "map": mapping, "games": report, "tv": tv}
+                       "sources": [s["name"] for s in sources], "archive": [archive_days(s) for s in sources]})
+    today = hockey_date()
+    history = {d: m for d, m in stored().get("history", {}).items()
+               if d >= (datetime.fromisoformat(today) - timedelta(days=HISTORY_DAYS)).date().isoformat()}
+    history[today] = mapping
+    return {"date": today, "map": mapping, "games": report, "tv": tv, "history": history}
 
 
 def main():

@@ -120,7 +120,8 @@ def main():
             wanted[key].add(sid)
 
     now = datetime.now(timezone.utc)
-    start_cut, end_cut = now - timedelta(hours=12), now + timedelta(days=args.days)
+    # Drygt ett dygn bakåt, så att tablån räcker för leverantörens catch-up (oftast 1 dygn).
+    start_cut, end_cut = now - timedelta(hours=30), now + timedelta(days=args.days)
     progs = defaultdict(list)                    # (källa, källans id) -> [programme]
     urls = all_sources()
     with tempfile.TemporaryDirectory() as tmp:

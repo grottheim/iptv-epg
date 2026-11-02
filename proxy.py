@@ -14,6 +14,8 @@ import argparse
 import json
 import re
 import urllib.error
+from datetime import datetime
+from zoneinfo import ZoneInfo
 import urllib.parse
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -23,6 +25,8 @@ from analyze import load_env
 from epgcommon import ROOT, UA
 
 SERVE = ROOT / "serve"
+# Leverantörens tidszon (server_info.timezone) – tiderna i catch-up-adresser anges i den.
+PROVIDER_TZ = ZoneInfo("Europe/Amsterdam")
 REDIRECT_PREFIXES = ("/live/", "/movie/", "/series/", "/timeshift/", "/streaming/", "/hls/", "/hlsr/",
                      "/get.php", "/images/")
 
@@ -77,6 +81,13 @@ class Handler(BaseHTTPRequestHandler):
         except urllib.error.HTTPError as e:
             return e.code, e.read(), e.headers.get("Content-Type", "text/plain")
 
+    @staticmethod
+    def timeshift_start(text):
+        try:
+            return datetime.strptime(text, "%Y-%m-%d:%H-%M").replace(tzinfo=PROVIDER_TZ)
+        except ValueError:
+            return None
+
     def do_HEAD(self):
         self.do_GET()
 
@@ -89,11 +100,25 @@ class Handler(BaseHTTPRequestHandler):
         if url.path.startswith(REDIRECT_PREFIXES):
             path = self.path
             virtual = re.fullmatch(r"(/live/[^/]+/[^/]+/)(99\d{7})(\.\w+)?", url.path)
-            if virtual:                            # fast NHL-kanal: skicka till kanalen som har matchen nu
+            if virtual:                            # NHL-kanal: skicka till kanalen som har matchen nu
                 real = nhl.resolve(virtual[2])
                 if not real:
                     return self.send(404, b'{"error":"no source"}')
                 path = f"{virtual[1]}{real}{virtual[3] or ''}"
+            # Catch-up på NHL-kanal: /timeshift/<user>/<pass>/<min>/<start>/<id>.ts
+            shift = re.fullmatch(r"(/timeshift/[^/]+/[^/]+/\d+/)([\d:-]+)/(99\d{7})(\.\w+)?", url.path)
+            if shift:
+                real = nhl.resolve(shift[3], self.timeshift_start(shift[2]))
+                if not real:
+                    return self.send(404, b'{"error":"no source"}')
+                path = f"{shift[1]}{shift[2]}/{real}{shift[4] or ''}"
+            # … eller /streaming/timeshift.php?stream=<id>&start=<start>&duration=<min>
+            stream = query.get("stream", [""])[0]
+            if url.path == "/streaming/timeshift.php" and re.fullmatch(r"99\d{7}", stream):
+                real = nhl.resolve(stream, self.timeshift_start(query.get("start", [""])[0]))
+                if not real:
+                    return self.send(404, b'{"error":"no source"}')
+                path = self.path.replace(f"stream={stream}", f"stream={real}")
             return self.send(302, extra={"Location": UPSTREAM + path})
 
         if url.path == "/xmltv.php":
@@ -111,6 +136,15 @@ class Handler(BaseHTTPRequestHandler):
                 only = [x for x in nhl.virtual_streams() if x["category_id"] == category]
                 return self.send(200, json.dumps(only).encode())
             status, body, ctype = self.upstream()
+            if status == 200 and not action:           # inloggning: låt UHF bygga alla adresser mot mellanhanden
+                try:
+                    info = json.loads(body)
+                    host, _, port = (self.headers.get("Host") or "").partition(":")
+                    if host and isinstance(info.get("server_info"), dict):
+                        info["server_info"].update({"url": host, "port": port or "80", "server_protocol": "http"})
+                        body = json.dumps(info, ensure_ascii=False).encode()
+                except ValueError:
+                    pass
             if status == 200 and action == "get_live_categories":
                 try:
                     body = json.dumps(nhl.virtual_categories() + json.loads(body),
