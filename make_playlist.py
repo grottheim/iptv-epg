@@ -101,6 +101,8 @@ def copy_tv_programmes(out):
         wanted.setdefault(t["epg"], []).append(t["tvg"])
         ch = ET.Element("channel", {"id": t["tvg"]})
         ET.SubElement(ch, "display-name").text = t["tvg"]   # neutralt namn, som för NHL 01 …
+        if t.get("icon"):
+            ET.SubElement(ch, "icon", {"src": t["icon"]})
         ch.tail = "\n"
         out.write(ET.tostring(ch, encoding="utf-8"))
     n = 0

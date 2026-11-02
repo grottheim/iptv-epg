@@ -30,7 +30,8 @@ MAX_SOURCES = 5                                 # huvudkanal + upp till fyra alt
 GAME_HOURS = 3.5
 DAY_START_UTC = 10                              # ett NHL-dygn räknas från kl. 10 UTC, då inga matcher pågår
 SE_TZ = ZoneInfo("Europe/Stockholm")
-HISTORY_DAYS = 3                                # så många dygns kopplingar sparas, för catch-up
+HISTORY_DAYS = 3
+NHL_LOGO = "http://103.176.90.154/picons/logos/USA/NHL.png"   # leverantörens NHL-logga, för matcher utan kanal                                # så många dygns kopplingar sparas, för catch-up
 
 # Andra namn på lagen än de NHL:s schema anger.
 EXTRA_NAMES = {
@@ -133,11 +134,13 @@ def virtual_streams():
     for g in stored().get("games", []):
         names = g.get("sources") or [f'Ingen kanal hittad: {g["game"]}']
         archive = g.get("archive", [])
+        icons = g.get("icons", [])
         for v, name in enumerate(names[:MAX_SOURCES]):
             category = CATEGORY_B if v else CATEGORY_ID
             out.append({
                 "num": virtual_id(g["slot"], v), "name": name.strip(), "stream_type": "live",
-                "stream_id": virtual_id(g["slot"], v), "stream_icon": "", "epg_channel_id": epg_id(g["slot"]),
+                "stream_id": virtual_id(g["slot"], v), "epg_channel_id": epg_id(g["slot"]),
+                "stream_icon": (icons[v] if v < len(icons) else "") or NHL_LOGO,
                 "added": "0", "is_adult": 0, "category_id": category, "category_ids": [int(category)],
                 "custom_sid": "", "direct_source": "", **archive_fields(archive[v] if v < len(archive) else 0),
             })
@@ -254,10 +257,12 @@ def epg_elements(schedule=None):
         yesterday = (datetime.fromisoformat(hockey_date()) - timedelta(days=1)).date().isoformat()
         schedule = {**fetch_schedule(yesterday), **fetch_schedule(hockey_date())}
     tv = stored().get("tv", [])
+    main_icon = {g["slot"]: (g.get("icons") or [""])[0] for g in stored().get("games", [])}
     channels = []
     for slot in range(1, MAX_GAMES + 1):
         ch = ET.Element("channel", {"id": epg_id(slot)})
         ET.SubElement(ch, "display-name").text = epg_id(slot)
+        ET.SubElement(ch, "icon", {"src": main_icon.get(slot) or NHL_LOGO})
         ch.tail = "\n"
         channels.append(ch)
 
@@ -304,7 +309,8 @@ def build(streams, cats, schedule=None):
         for v, s in enumerate(sources):
             mapping[str(virtual_id(slot, v))] = s["stream_id"]
         report.append({"slot": slot, "game": title_of(game), "start": game["startTimeUTC"],
-                       "sources": [s["name"] for s in sources], "archive": [archive_days(s) for s in sources]})
+                       "sources": [s["name"] for s in sources], "archive": [archive_days(s) for s in sources],
+                       "icons": [s.get("stream_icon") or "" for s in sources]})
     today = hockey_date()
     history = {d: m for d, m in stored().get("history", {}).items()
                if d >= (datetime.fromisoformat(today) - timedelta(days=HISTORY_DAYS)).date().isoformat()}
