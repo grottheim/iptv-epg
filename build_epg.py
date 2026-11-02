@@ -168,6 +168,7 @@ def main():
             # Samma källkanal kan delas av flera mål-id: kopiera i så fall elementet.
             if p.get("channel") != tid and p.get("_used"):
                 p = ET.fromstring(ET.tostring(p))
+                p.tail = "\n"
             p.set("_used", "1")
             p.set("channel", tid)
             plist.append(p)
@@ -180,6 +181,7 @@ def main():
                 chans.append(ach)
                 for p in best:
                     c = ET.fromstring(ET.tostring(p))
+                    c.tail = "\n"
                     c.set("channel", alt)
                     c.attrib.pop("_used", None)
                     plist.append(c)

@@ -107,7 +107,7 @@ class Handler(BaseHTTPRequestHandler):
         if url.path == "/player_api.php":
             action = query.get("action", [""])[0]
             category = query.get("category_id", [""])[0]
-            if action == "get_live_streams" and category in (nhl.CATEGORY_ID, nhl.CATEGORY_B):
+            if action == "get_live_streams" and category in (nhl.CATEGORY_ID, nhl.CATEGORY_B, nhl.CATEGORY_TV):
                 only = [x for x in nhl.virtual_streams() if x["category_id"] == category]
                 return self.send(200, json.dumps(only).encode())
             status, body, ctype = self.upstream()

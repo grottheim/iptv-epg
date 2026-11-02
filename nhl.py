@@ -21,7 +21,8 @@ SERVE = ROOT / "serve"
 MAP_FILE = SERVE / "nhl.json"
 SCHEDULE_URL = "https://api-web.nhle.com/v1/schedule/{}"
 
-CATEGORY_ID, CATEGORY_B = "990001", "990002"
+CATEGORY_ID, CATEGORY_B, CATEGORY_TV = "990001", "990002", "990003"
+TV_BASE_ID = 991000000
 MAX_GAMES = 16                                  # NHL har 32 lag
 BASE_ID = 990000000
 VARIANTS = ["", " B", " C"]
@@ -34,6 +35,31 @@ EXTRA_NAMES = {
     "VGK": ["VEGAS"], "TOR": ["LEAFS"], "NYR": ["NY RANGERS"], "NYI": ["NY ISLANDERS"],
     "UTA": ["UTAH HOCKEY CLUB", "UTAH HC"], "STL": ["ST LOUIS"], "MTL": ["MONTREAL"],
 }
+# Tv-kanaler som sänder NHL: NHL:s nätverkskod(er) -> leverantörens kanalnamn (regex). Ordningen blir
+# ordningen i gruppen "NHL - TV-KANALER". Strömningstjänster (Prime, ESPN+, HBO MAX …) saknas, eftersom de
+# bara finns som matchströmmar hos leverantören.
+TV_CHANNELS = [
+    (("SN", "SNO"), r"^CA\| SPORTSNET ONTARIO"), (("SNE",), r"^CA\| SPORTSNET EAST"),
+    (("SNW",), r"^CA\| SPORTSNET WEST"), (("SNP",), r"^CA\| SPORTSNET PACIFIC"),
+    (("SN1",), r"^CA\| SPORTSNET ONE"), (("SN360",), r"^CA\| SPORTSNET 360"),
+    (("TSN1",), r"^CA\| TSN ?1\b"), (("TSN2",), r"^CA\| TSN ?2\b"), (("TSN3",), r"^CA\| TSN ?3\b"),
+    (("TSN4",), r"^CA\| TSN ?4\b"), (("TSN5",), r"^CA\| TSN ?5\b"),
+    (("CBC",), r"^CA\| CBC TORONTO"), (("CITY",), r"^CA\| CITY TV TORONTO"),
+    (("TVAS", "TVAS-D"), r"^CA\| TVA SPORTS HD"), (("TVAS2",), r"^CA\| TVA SPORTS 2"),
+    (("RDS",), r"^CA\| RDS HD"), (("RDS2",), r"^CA\| RDS 2"), (("RDSI",), r"^CA\| RDS INFO HD"),
+    (("TNT",), r"^US\| TNT HD$"), (("truTV",), r"^US\| TRUTV HD"), (("NHLN",), r"^US\| NHL NETWORK"),
+    (("ESPN",), r"^US\| ESPN HD$"), (("ESPN2",), r"^US\| ESPN ?2 HD$"),
+    (("NESN",), r"^US\| NESN HD$"), (("NESN+",), r"^US\| NESN PLUS"),
+    (("MSG",), r"^US\| MSG HD"), (("MSG 2", "MSG2"), r"^US\| MSG 2 HD"), (("MSGSN",), r"^TV\| MSG SPORTSNET"),
+    (("NBCSP",), r"^US\| NBC SPORTS PHILADELFIA"), (("NBCSCA",), r"^US\| NBC SPORTS CALIFORNIA$"),
+    (("SN-PIT",), r"^US\| SPORTSNET PITTSBURGH"), (("MNMT",), r"^US\| MONUMENTAL SPORTS NETWORK"),
+    (("CHSN",), r"^US\| CHICAGO SPORTS NETWORK HD"), (("DSN",), r"^US\| DETROIT SPORTSNET"),
+    (("ALT",), r"^US\| ALTITUDE SPORTS HD"), (("ALT2",), r"^US\| ALTITUDE SPORTS 2"),
+    (("KONG",), r"^TV\| SEATTLE, WA KONG"), (("KING",), r"^US\| NBC 5 SEATTLE"),
+    (("KTVD",), r"^TV\| DENVER, CO KTVD.*\(D11\)"), (("KUSA",), r"^US\| NBC 9 DENVER"),
+    (("KSTP",), r"^US\| ABC 5 MINNEAPOLIS"), (("KTTV",), r"^US\| FOX 11 LOS ANGELES"),
+    (("Utah16",), r"^TV\| SALT LAKE CITY, UT KUPX"), (("KDFI",), r"KDFI"),
+]
 # Matchfeeds hos leverantören; bästa källan först. Kategorier blandas för att reserverna ska vara oberoende.
 SOURCE_ORDER = [r"^US\| NHL PACKAGE", r"^US\| ESPN", r"^CA\|", r"^US\|", r"NHL|DAZN|SOCCER", r"^SWEDEN", r"."]
 OTHER_SPORT = re.compile(r"\b(NFL|NBA|MLB|WNBA|NCAA|RUGBY|BASKETBALL|FOOTBALL|SOCCER:|AHL|OHL|WHL|QMJHL|JR)\b")
@@ -51,12 +77,42 @@ def epg_id(slot):
 
 def virtual_categories():
     return [{"category_id": CATEGORY_ID, "category_name": "NHL - DAGENS MATCHER", "parent_id": 0},
+            {"category_id": CATEGORY_TV, "category_name": "NHL - TV-KANALER", "parent_id": 0},
             {"category_id": CATEGORY_B, "category_name": "NHL - RESERVKANALER", "parent_id": 0}]
+
+
+def stored():
+    try:
+        return json.loads(MAP_FILE.read_text())
+    except (OSError, ValueError):
+        return {}
+
+
+def find_tv(streams, cats):
+    """Leverantörens kanal för varje tv-kanal i TV_CHANNELS: helst med EPG-id och i HD."""
+    out = []
+    for i, (codes, rx) in enumerate(TV_CHANNELS):
+        cands = [s for s in streams if re.search(rx, s.get("name", "").strip())
+                 and not re.search(r"PPV|PACKAGE", cats.get(s.get("category_id"), ""))]
+        if cands:
+            best = min(cands, key=lambda s: (not (s.get("epg_channel_id") or "").strip(),
+                                             "RAW" in clean(s["name"]), len(s["name"])))
+            out.append({"id": TV_BASE_ID + i, "real": best["stream_id"], "name": best["name"].strip(),
+                        "epg": (best.get("epg_channel_id") or "").strip(), "icon": best.get("stream_icon") or "",
+                        "codes": list(codes)})
+    return out
 
 
 def virtual_streams():
     """Kanallistans poster för de fasta kanalerna. Namnen ändras aldrig; tablån visar matchen."""
     out = []
+    for tv in stored().get("tv", []):
+        out.append({
+            "num": tv["id"], "name": tv["name"], "stream_type": "live", "stream_id": tv["id"],
+            "stream_icon": tv["icon"], "epg_channel_id": tv["epg"], "added": "0", "is_adult": 0,
+            "category_id": CATEGORY_TV, "category_ids": [int(CATEGORY_TV)], "custom_sid": "",
+            "tv_archive": 0, "direct_source": "", "tv_archive_duration": 0,
+        })
     for slot in range(1, MAX_GAMES + 1):
         for v, suffix in enumerate(VARIANTS):
             category = CATEGORY_B if v else CATEGORY_ID
@@ -71,10 +127,7 @@ def virtual_streams():
 
 def resolve(stream_id):
     """Riktig kanal för en virtuell kanal, eller None om ingen källa finns just nu."""
-    try:
-        return json.loads(MAP_FILE.read_text()).get("map", {}).get(str(stream_id))
-    except (OSError, ValueError):
-        return None
+    return stored().get("map", {}).get(str(stream_id))
 
 
 def hockey_date(now=None):
@@ -137,15 +190,18 @@ def carries_game(stream_name, category, game):
     return not dates or bool(dates & allowed)
 
 
-def sources_for(game, streams, cats):
-    """Upp till tre kanaler för en match, från olika kategorier när det går."""
+def sources_for(game, streams, cats, tv=()):
+    """Upp till tre kanaler för en match: först tv-kanalen som sänder den, sedan matchströmmar."""
+    codes = {b["network"].strip() for b in game.get("tvBroadcasts", [])}
+    real = {t["real"] for t in tv if codes & set(t["codes"])}
+    broadcast = [s for s in streams if s["stream_id"] in real]
     hits = [s for s in streams if carries_game(s.get("name", ""), cats.get(s.get("category_id"), ""), game)]
 
     def rank(s):
         cat = cats.get(s.get("category_id"), "")
         return next(i for i, rx in enumerate(SOURCE_ORDER) if re.search(rx, cat))
     hits.sort(key=rank)
-    picked, used = [], set()
+    picked, used = list(broadcast), set()
     for s in hits:                               # först en per kategori …
         cat = s.get("category_id")
         if cat not in used:
@@ -164,9 +220,15 @@ def title_of(game):
     return f'{away["placeName"]["default"]} {away["commonName"]["default"]} @ {home["placeName"]["default"]} {home["commonName"]["default"]}'
 
 
+def broadcast_text(game, tv):
+    names = {c: t["name"].split("|", 1)[-1].strip() for t in tv for c in t["codes"]}
+    return ", ".join(names.get(b["network"].strip(), b["network"].strip()) for b in game.get("tvBroadcasts", []))
+
+
 def epg_elements(schedule=None):
     """(kanalposter, programposter) för de fasta kanalerna, för hela veckans spelschema."""
     schedule = schedule or fetch_schedule(hockey_date())
+    tv = stored().get("tv", [])
     channels = []
     for slot in range(1, MAX_GAMES + 1):
         ch = ET.Element("channel", {"id": epg_id(slot)})
@@ -196,7 +258,7 @@ def epg_elements(schedule=None):
             start = datetime.fromisoformat(game["startTimeUTC"].replace("Z", "+00:00"))
             stop = min(start + timedelta(hours=GAME_HOURS), day_end)
             local = start.astimezone(SE_TZ)
-            desc = f"{local:%a %d %b %H:%M} svensk tid. TV: " + ", ".join(b["network"].strip() for b in game.get("tvBroadcasts", []))
+            desc = f"{local:%a %d %b %H:%M} svensk tid. TV: {broadcast_text(game, tv)}"
             if start > day_start:
                 progs.append(prog(slot, day_start, start, f"{local:%H:%M}  {title}", desc))
             progs.append(prog(slot, start, stop, title, desc))
@@ -209,14 +271,16 @@ def build(streams, cats, schedule=None):
     """Dagens koppling mellan fasta kanaler och riktiga kanaler."""
     schedule = schedule or fetch_schedule(hockey_date())
     games = schedule.get(hockey_date(), [])
-    mapping, report = {}, []
+    tv = find_tv(streams, cats)
+    mapping, report = {t["id"]: t["real"] for t in tv}, []
+    mapping = {str(k): v for k, v in mapping.items()}
     for slot, game in enumerate(games[:MAX_GAMES], 1):
-        sources = sources_for(game, streams, cats)
+        sources = sources_for(game, streams, cats, tv)
         for v, s in enumerate(sources):
             mapping[str(virtual_id(slot, v))] = s["stream_id"]
         report.append({"slot": slot, "game": title_of(game), "start": game["startTimeUTC"],
                        "sources": [s["name"] for s in sources]})
-    return {"date": hockey_date(), "map": mapping, "games": report}
+    return {"date": hockey_date(), "map": mapping, "games": report, "tv": tv}
 
 
 def main():
@@ -228,6 +292,7 @@ def main():
     tmp = SERVE / "nhl.tmp"
     tmp.write_text(json.dumps(data, ensure_ascii=False, indent=1))
     tmp.replace(MAP_FILE)
+    print(f'{len(data["tv"])} tv-kanaler: ' + ", ".join(t["name"] for t in data["tv"]))
     print(f'{data["date"]}: {len(data["games"])} matcher, {sum(bool(g["sources"]) for g in data["games"])} med källa')
     for g in data["games"]:
         print(f'  NHL {g["slot"]:02d} {g["start"]} {g["game"]}')

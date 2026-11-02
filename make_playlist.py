@@ -92,6 +92,41 @@ def epg_countries():
     return [c.strip() for c in text.replace("\n", ",").split(",") if c.strip()]
 
 
+def copy_tv_programmes(out):
+    """Tablåerna för tv-kanalerna i gruppen "NHL - TV-KANALER", ur USA:s och Kanadas filer.
+    Bara de kanalernas program kopieras, så att EPG:n inte blir för tung för Apple TV."""
+    tv = nhl.stored().get("tv", [])
+    wanted = {t["epg"] for t in tv if t["epg"]}
+    for t in tv:
+        if t["epg"]:
+            ch = ET.Element("channel", {"id": t["epg"]})
+            ET.SubElement(ch, "display-name").text = t["name"]
+            ch.tail = "\n"
+            out.write(ET.tostring(ch, encoding="utf-8"))
+    n = 0
+    for c in ("us", "ca"):
+        if c in epg_countries():
+            continue
+        url = BASE_URL + f"epg-{c}.xml.gz"
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": UA})
+            with urllib.request.urlopen(req, timeout=300) as r, gzip.GzipFile(fileobj=r) as src:
+                for _, el in ET.iterparse(src):
+                    if el.tag == "programme":
+                        if el.get("channel") in wanted:
+                            for child in el.findall("category"):
+                                el.remove(child)
+                            el.tail = "\n"
+                            out.write(ET.tostring(el, encoding="utf-8"))
+                        el.clear()
+                    elif el.tag == "channel":
+                        el.clear()
+            n += 1
+        except Exception as e:
+            print(f"VARNING: kunde inte hämta {url}: {e}")
+    return n
+
+
 def build_full_epg(gen_ch, gen_pr):
     """serve/epg-full.xml.gz: hela tablån för valda länder (från GitHub Pages) plus genererade NHL-tablåer.
     Filerna kopieras som text utan att tolkas, så att det ryms i minnet även på en liten server."""
@@ -121,6 +156,7 @@ def build_full_epg(gen_ch, gen_pr):
                 n += 1
             except Exception as e:
                 print(f"VARNING: kunde inte hämta {url}: {e}")
+        n += copy_tv_programmes(out)
         for el in gen_pr:
             out.write(ET.tostring(el, encoding="utf-8"))
         out.write(b"</tv>\n")
