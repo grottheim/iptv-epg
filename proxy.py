@@ -5,6 +5,7 @@
 - player_api.php (övrigt)                 -> vidarebefordras oförändrat
 - xmltv.php                               -> egen EPG (serve/epg-full.xml.gz: valda länder + NHL-tablåer)
 - /live/ /movie/ /series/ /timeshift/ …   -> omdirigeras till leverantören (videon går aldrig via mellanhanden)
+- /health                                 -> hälsokontroll för övervakningen (ingen inloggning, inga hemligheter)
 - NHL 01, NHL 02 …                        -> fasta kanaler som omdirigeras till kanalen med matchen (se nhl.py)
 
 Bara det användarnamn som står i .env släpps igenom, så att servern inte blir en öppen proxy.
@@ -13,6 +14,7 @@ Användning:  python3 proxy.py [--port 8080]
 import argparse
 import json
 import re
+import time
 import urllib.error
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -88,12 +90,53 @@ class Handler(BaseHTTPRequestHandler):
         except ValueError:
             return None
 
+    _provider = (0.0, {})                          # (tidpunkt, svar) – leverantörskontroll cachas 10 min
+
+    def health(self):
+        """Hälsokontroll utan inloggning: hur färska filerna är och om leverantörskontot fungerar."""
+        now = time.time()
+
+        def age(name):
+            try:
+                return round((now - (SERVE / name).stat().st_mtime) / 60)
+            except OSError:
+                return None
+        checked, info = Handler._provider
+        if now - checked > 600:
+            try:
+                q = urllib.parse.urlencode({"username": ENV["XTREAM_USER"], "password": ENV["XTREAM_PASS"]})
+                req = urllib.request.Request(f"{UPSTREAM}/player_api.php?{q}", headers={"User-Agent": UA})
+                with urllib.request.urlopen(req, timeout=30) as r:
+                    info = json.load(r).get("user_info", {})
+            except Exception as e:
+                info = {"error": type(e).__name__}
+            Handler._provider = (now, info)
+        exp = info.get("exp_date")
+        days_left = round((int(exp) - now) / 86400) if str(exp or "").isdigit() else None
+        result = {
+            "nhl_age_min": age("nhl.json"), "epg_age_min": age("epg-full.xml.gz"),
+            "provider_status": info.get("status") or info.get("error"), "account_days_left": days_left,
+        }
+        problems = []
+        if result["nhl_age_min"] is None or result["nhl_age_min"] > 45:
+            problems.append("NHL-kopplingen uppdateras inte")
+        if result["epg_age_min"] is None or result["epg_age_min"] > 240:
+            problems.append("EPG:n uppdateras inte")
+        if result["provider_status"] != "Active":
+            problems.append("IPTV-kontot svarar inte eller är inte aktivt")
+        if days_left is not None and days_left < 7:
+            problems.append(f"IPTV-kontot går ut om {days_left} dagar")
+        result["problems"] = problems
+        self.send(503 if problems else 200, json.dumps(result, ensure_ascii=False).encode())
+
     def do_HEAD(self):
         self.do_GET()
 
     def do_GET(self):
         url = urllib.parse.urlsplit(self.path)
         query = urllib.parse.parse_qs(url.query)
+        if url.path == "/health":
+            return self.health()
         if not self.authorized(url.path, query):
             return self.send(403, b'{"error":"forbidden"}')
 

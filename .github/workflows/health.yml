@@ -1,0 +1,30 @@
+name: Övervaka mellanhanden
+
+# Körs var 6:e timme. Ett misslyckat jobb gör att GitHub mejlar repots ägare.
+on:
+  schedule:
+    - cron: "20 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Håll de schemalagda jobben igång
+        # GitHub stänger av schemalagda jobb i publika repon efter 60 dagar utan aktivitet.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for wf in epg.yml health.yml; do
+            gh api -X PUT "repos/${{ github.repository }}/actions/workflows/$wf/enable" || true
+          done
+      - name: Kontrollera mellanhanden
+        env:
+          HEALTH_URL: ${{ secrets.HEALTH_URL }}
+        run: |
+          body=$(curl -s --max-time 60 -w '\n%{http_code}' "$HEALTH_URL") || { echo "Mellanhanden svarar inte"; exit 1; }
+          code=$(echo "$body" | tail -1); echo "$body" | head -1
+          [ "$code" = 200 ] || { echo "Problem hittade (HTTP $code)"; exit 1; }
