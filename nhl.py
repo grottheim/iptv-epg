@@ -67,6 +67,7 @@ TV_CHANNELS = [
 SOURCE_ORDER = [r"^US\| NHL PACKAGE", r"^US\| ESPN", r"^CA\|", r"^US\|", r"NHL|DAZN|SOCCER", r"^SWEDEN", r"."]
 OTHER_SPORT = re.compile(r"\b(NFL|NBA|MLB|WNBA|NCAA|RUGBY|BASKETBALL|FOOTBALL|SOCCER:|AHL|OHL|WHL|QMJHL|JR)\b")
 LOWER_LEAGUE_CAT = re.compile(r"AHL|OHL|WHL|QMJHL|HOCKEY LEAGUE|FLO |NFL|NBA|MLB|NCAA", re.I)
+FRENCH = {"TVAS", "TVAS-D", "TVAS2", "RDS", "RDS2", "RDSI"}
 MONTHS = {m: i + 1 for i, m in enumerate("JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC".split())}
 
 
@@ -218,9 +219,14 @@ def carries_game(stream_name, category, game):
 
 def sources_for(game, streams, cats, tv=()):
     """Upp till tre kanaler för en match: först tv-kanalen som sänder den, sedan matchströmmar."""
-    codes = {b["network"].strip() for b in game.get("tvBroadcasts", [])}
-    real = {t["real"] for t in tv if codes & set(t["codes"])}
-    broadcast = [s for s in streams if s["stream_id"] in real]
+    # Tv-kanalerna i turordning: engelska före franska (TVA, RDS), sedan rikstäckande, hemmalagets, bortalagets.
+    def broadcast_rank(b):
+        return (b["network"].strip() in FRENCH, "NHA".find(b.get("market", "")) % 3)
+    real = []
+    for b in sorted(game.get("tvBroadcasts", []), key=broadcast_rank):
+        real += [t["real"] for t in tv if b["network"].strip() in t["codes"] and t["real"] not in real]
+    by_id = {s["stream_id"]: s for s in streams}
+    broadcast = [by_id[r] for r in real if r in by_id]
     hits = [s for s in streams if carries_game(s.get("name", ""), cats.get(s.get("category_id"), ""), game)]
 
     def rank(s):
