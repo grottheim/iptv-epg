@@ -62,9 +62,12 @@ TV_CHANNELS = [
     (("KTVD",), r"^TV\| DENVER, CO KTVD.*\(D11\)"), (("KUSA",), r"^US\| NBC 9 DENVER"),
     (("KSTP",), r"^US\| ABC 5 MINNEAPOLIS"), (("KTTV",), r"^US\| FOX 11 LOS ANGELES"),
     (("Utah16",), r"^TV\| SALT LAKE CITY, UT KUPX"), (("KDFI",), r"KDFI"),
+    # Kod:lag = nätverket bara för det laget (Scripps sänder olika lag på olika lokalkanaler).
+    (("SCRIPPS:VGK",), r"^US\| VEGAS34 \(KMCC\)"),
 ]
 # Matchfeeds hos leverantören; bästa källan först. Kategorier blandas för att reserverna ska vara oberoende.
-SOURCE_ORDER = [r"^US\| NHL PACKAGE", r"^US\| ESPN", r"^CA\|", r"^US\|", r"NHL|DAZN|SOCCER", r"^SWEDEN", r"."]
+# NHL-paketets flöden (NHL | 01 …) visar "Commercial Break" i pauserna och hamnar därför efter de andra.
+SOURCE_ORDER = [r"^US\| ESPN", r"^CA\|", r"^US\|(?! NHL PACKAGE)", r"DAZN|SOCCER", r"NHL", r"^SWEDEN", r"."]
 OTHER_SPORT = re.compile(r"\b(NFL|NBA|MLB|WNBA|NCAA|RUGBY|BASKETBALL|FOOTBALL|SOCCER:|AHL|OHL|WHL|QMJHL|JR)\b")
 LOWER_LEAGUE_CAT = re.compile(r"AHL|OHL|WHL|QMJHL|HOCKEY LEAGUE|FLO |NFL|NBA|MLB|NCAA", re.I)
 FRENCH = {"TVAS", "TVAS-D", "TVAS2", "RDS", "RDS2", "RDSI"}
@@ -109,7 +112,7 @@ def find_tv(streams, cats):
     out = []
     for i, (codes, rx) in enumerate(TV_CHANNELS):
         cands = [s for s in streams if re.search(rx, s.get("name", "").strip())
-                 and not re.search(r"PPV|PACKAGE", cats.get(s.get("category_id"), ""))]
+                 and not re.search(r"PPV|(?<!NHL) PACKAGE", cats.get(s.get("category_id"), ""))]
         if cands:
             best = min(cands, key=lambda s: (not (s.get("epg_channel_id") or "").strip(), not archive_days(s),
                                              "RAW" in clean(s["name"]), len(s["name"])))
@@ -224,7 +227,7 @@ def sources_for(game, streams, cats, tv=()):
         return (b["network"].strip() in FRENCH, "NHA".find(b.get("market", "")) % 3)
     real = []
     for b in sorted(game.get("tvBroadcasts", []), key=broadcast_rank):
-        real += [t["real"] for t in tv if b["network"].strip() in t["codes"] and t["real"] not in real]
+        real += [t["real"] for t in tv if broadcast_keys(game, b) & set(t["codes"]) and t["real"] not in real]
     by_id = {s["stream_id"]: s for s in streams}
     broadcast = [by_id[r] for r in real if r in by_id]
     hits = [s for s in streams if carries_game(s.get("name", ""), cats.get(s.get("category_id"), ""), game)]
@@ -252,9 +255,17 @@ def title_of(game):
     return f'{away["placeName"]["default"]} {away["commonName"]["default"]} @ {home["placeName"]["default"]} {home["commonName"]["default"]}'
 
 
+def broadcast_keys(game, b):
+    """Koder som en sändning matchar: nätverket, och nätverket:laget för lokala sändningar."""
+    net = b["network"].strip()
+    team = {"H": game["homeTeam"], "A": game["awayTeam"]}.get(b.get("market"), {}).get("abbrev")
+    return {net, f"{net}:{team}"} if team else {net}
+
+
 def broadcast_text(game, tv):
     names = {c: t["name"].split("|", 1)[-1].strip() for t in tv for c in t["codes"]}
-    return ", ".join(names.get(b["network"].strip(), b["network"].strip()) for b in game.get("tvBroadcasts", []))
+    return ", ".join(next((names[k] for k in broadcast_keys(game, b) if k in names), b["network"].strip())
+                     for b in game.get("tvBroadcasts", []))
 
 
 def epg_elements(schedule=None):
