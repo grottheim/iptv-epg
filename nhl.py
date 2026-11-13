@@ -26,7 +26,9 @@ CATEGORY_ID, CATEGORY_B, CATEGORY_TV = "990001", "990002", "990003"
 TV_BASE_ID = 991000000
 MAX_GAMES = 16                                  # NHL har 32 lag
 BASE_ID = 990000000
-MAX_SOURCES = 5                                 # huvudkanal + upp till fyra alternativ per match
+MAX_TV = 6                                      # tv-kanaler per match (gruppen DAGENS MATCHER)
+MAX_RESERVES = 4                                # matchströmmar per match (gruppen RESERVKANALER)
+MAX_SOURCES = 10                                # tv-kanaler + reserver per match (variant 0–9)
 GAME_HOURS = 3.5
 DAY_START_UTC = 10                              # ett NHL-dygn räknas från kl. 10 UTC, då inga matcher pågår
 SE_TZ = ZoneInfo("Europe/Stockholm")
@@ -70,7 +72,6 @@ TV_CHANNELS = [
 SOURCE_ORDER = [r"^US\| ESPN", r"^CA\|", r"^US\|(?! NHL PACKAGE)", r"DAZN|SOCCER", r"NHL", r"^SWEDEN", r"."]
 OTHER_SPORT = re.compile(r"\b(NFL|NBA|MLB|WNBA|NCAA|RUGBY|BASKETBALL|FOOTBALL|SOCCER:|AHL|OHL|WHL|QMJHL|JR)\b")
 LOWER_LEAGUE_CAT = re.compile(r"AHL|OHL|WHL|QMJHL|HOCKEY LEAGUE|FLO |NFL|NBA|MLB|NCAA", re.I)
-FRENCH = {"TVAS", "TVAS-D", "TVAS2", "RDS", "RDS2", "RDSI"}
 MONTHS = {m: i + 1 for i, m in enumerate("JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC".split())}
 
 
@@ -78,8 +79,9 @@ def virtual_id(slot, variant=0):
     return BASE_ID + slot * 10 + variant
 
 
-def epg_id(slot):
-    return f"nhl{slot:02d}.game"
+def epg_id(slot, variant=0):
+    """Eget EPG-id per kanal: delar flera kanaler samma id visar UHF tablån bara på en av dem."""
+    return f"nhl{slot:02d}.game" if not variant else f"nhl{slot:02d}-{variant}.game"
 
 
 def virtual_categories():
@@ -134,16 +136,17 @@ def virtual_streams():
             "direct_source": "", **archive_fields(tv.get("archive", 0)),
         })
     # Dagens matcher: kanalerna heter som den kanal de visar; tablån (NHL:s schema) visar matchen.
-    # Huvudkanalen ligger i "DAGENS MATCHER", alternativen i "RESERVKANALER".
+    # Tv-kanalerna som sänder matchen (i NHL:s ordning) ligger i "DAGENS MATCHER", matchströmmarna i
+    # "RESERVKANALER". Saknas tv-kanal hamnar den bästa matchströmmen i "DAGENS MATCHER".
     for g in stored().get("games", []):
         names = g.get("sources") or [f'Ingen kanal hittad: {g["game"]}']
         archive = g.get("archive", [])
         icons = g.get("icons", [])
         for v, name in enumerate(names[:MAX_SOURCES]):
-            category = CATEGORY_B if v else CATEGORY_ID
+            category = CATEGORY_ID if v < max(1, g.get("main", 1)) else CATEGORY_B
             out.append({
                 "num": virtual_id(g["slot"], v), "name": name.strip(), "stream_type": "live",
-                "stream_id": virtual_id(g["slot"], v), "epg_channel_id": epg_id(g["slot"]),
+                "stream_id": virtual_id(g["slot"], v), "epg_channel_id": epg_id(g["slot"], v),
                 "stream_icon": (icons[v] if v < len(icons) else "") or NHL_LOGO,
                 "added": "0", "is_adult": 0, "category_id": category, "category_ids": [int(category)],
                 "custom_sid": "", "direct_source": "", **archive_fields(archive[v] if v < len(archive) else 0),
@@ -221,15 +224,13 @@ def carries_game(stream_name, category, game):
 
 
 def sources_for(game, streams, cats, tv=()):
-    """Upp till tre kanaler för en match: först tv-kanalen som sänder den, sedan matchströmmar."""
-    # Tv-kanalerna i turordning: engelska före franska (TVA, RDS), sedan rikstäckande, hemmalagets, bortalagets.
-    def broadcast_rank(b):
-        return (b["network"].strip() in FRENCH, "NHA".find(b.get("market", "")) % 3)
+    """(kanaler, antal tv-kanaler) för en match: först tv-kanalerna som sänder den, i samma ordning som
+    NHL anger dem, sedan matchströmmar som reserver."""
     real = []
-    for b in sorted(game.get("tvBroadcasts", []), key=broadcast_rank):
+    for b in game.get("tvBroadcasts", []):
         real += [t["real"] for t in tv if broadcast_keys(game, b) & set(t["codes"]) and t["real"] not in real]
     by_id = {s["stream_id"]: s for s in streams}
-    broadcast = [by_id[r] for r in real if r in by_id]
+    broadcast = [by_id[r] for r in real if r in by_id][:MAX_TV]
     hits = [s for s in streams if carries_game(s.get("name", ""), cats.get(s.get("category_id"), ""), game)]
 
     def rank(s):
@@ -247,7 +248,7 @@ def sources_for(game, streams, cats, tv=()):
         full = clean(f'{team["placeName"]["default"]} {team["commonName"]["default"]}')
         picked += [s for s in streams if s.get("name", "").startswith("NHL TEAM|")
                    and clean(s["name"].split("|", 1)[1]) == full]
-    return picked[:MAX_SOURCES]
+    return picked[:min(MAX_SOURCES, len(broadcast) + MAX_RESERVES)], len(broadcast)
 
 
 def title_of(game):
@@ -274,23 +275,28 @@ def epg_elements(schedule=None):
         yesterday = (datetime.fromisoformat(hockey_date()) - timedelta(days=1)).date().isoformat()
         schedule = {**fetch_schedule(yesterday), **fetch_schedule(hockey_date())}
     tv = stored().get("tv", [])
-    main_icon = {g["slot"]: (g.get("icons") or [""])[0] for g in stored().get("games", [])}
+    icons = {g["slot"]: g.get("icons") or [] for g in stored().get("games", [])}
     channels = []
     for slot in range(1, MAX_GAMES + 1):
-        ch = ET.Element("channel", {"id": epg_id(slot)})
-        ET.SubElement(ch, "display-name").text = epg_id(slot)
-        ET.SubElement(ch, "icon", {"src": main_icon.get(slot) or NHL_LOGO})
-        ch.tail = "\n"
-        channels.append(ch)
+        for v in range(MAX_SOURCES):
+            ch = ET.Element("channel", {"id": epg_id(slot, v)})
+            ET.SubElement(ch, "display-name").text = epg_id(slot, v)
+            icon = icons.get(slot, [])[v] if v < len(icons.get(slot, [])) else ""
+            ET.SubElement(ch, "icon", {"src": icon or NHL_LOGO})
+            ch.tail = "\n"
+            channels.append(ch)
 
-    def prog(slot, start, stop, title, desc=None):
-        p = ET.Element("programme", {"start": start.strftime("%Y%m%d%H%M%S +0000"),
-                                     "stop": stop.strftime("%Y%m%d%H%M%S +0000"), "channel": epg_id(slot)})
-        ET.SubElement(p, "title", {"lang": "en"}).text = title
-        if desc:
-            ET.SubElement(p, "desc", {"lang": "en"}).text = desc
-        p.tail = "\n"
-        return p
+    def one_prog(slot, start, stop, title, desc=None):
+        out = []
+        for v in range(MAX_SOURCES):            # samma tablå på alla kanaler för matchen
+            p = ET.Element("programme", {"start": start.strftime("%Y%m%d%H%M%S +0000"),
+                                         "stop": stop.strftime("%Y%m%d%H%M%S +0000"), "channel": epg_id(slot, v)})
+            ET.SubElement(p, "title", {"lang": "en"}).text = title
+            if desc:
+                ET.SubElement(p, "desc", {"lang": "en"}).text = desc
+            p.tail = "\n"
+            out.append(p)
+        return out
 
     progs = []
     for date, games in schedule.items():
@@ -298,7 +304,7 @@ def epg_elements(schedule=None):
         day_end = day_start + timedelta(days=1)
         for slot in range(1, MAX_GAMES + 1):
             if slot > len(games):
-                progs.append(prog(slot, day_start, day_end, "No game"))
+                progs.extend(one_prog(slot, day_start, day_end, "No game"))
                 continue
             game = games[slot - 1]
             title = title_of(game)
@@ -307,10 +313,10 @@ def epg_elements(schedule=None):
             local = start.astimezone(SE_TZ)
             desc = f"{local:%a %d %b %H:%M} svensk tid. TV: {broadcast_text(game, tv)}"
             if start > day_start:
-                progs.append(prog(slot, day_start, start, f"{local:%H:%M}  {title}", desc))
-            progs.append(prog(slot, start, stop, title, desc))
+                progs.extend(one_prog(slot, day_start, start, f"{local:%H:%M}  {title}", desc))
+            progs.extend(one_prog(slot, start, stop, title, desc))
             if stop < day_end:
-                progs.append(prog(slot, stop, day_end, f"Ended: {title}"))
+                progs.extend(one_prog(slot, stop, day_end, f"Ended: {title}"))
     return channels, progs
 
 
@@ -322,11 +328,11 @@ def build(streams, cats, schedule=None):
     mapping, report = {t["id"]: t["real"] for t in tv}, []
     mapping = {str(k): v for k, v in mapping.items()}
     for slot, game in enumerate(games[:MAX_GAMES], 1):
-        sources = sources_for(game, streams, cats, tv)
+        sources, main = sources_for(game, streams, cats, tv)
         for v, s in enumerate(sources):
             mapping[str(virtual_id(slot, v))] = s["stream_id"]
         report.append({"slot": slot, "game": title_of(game), "start": game["startTimeUTC"],
-                       "sources": [s["name"] for s in sources], "archive": [archive_days(s) for s in sources],
+                       "sources": [s["name"] for s in sources], "main": main, "archive": [archive_days(s) for s in sources],
                        "icons": [s.get("stream_icon") or "" for s in sources]})
     today = hockey_date()
     history = {d: m for d, m in stored().get("history", {}).items()
