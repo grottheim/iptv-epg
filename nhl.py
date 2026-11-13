@@ -139,7 +139,7 @@ def virtual_streams():
     # Tv-kanalerna som sänder matchen (i NHL:s ordning) ligger i "DAGENS MATCHER", matchströmmarna i
     # "RESERVKANALER". Saknas tv-kanal hamnar den bästa matchströmmen i "DAGENS MATCHER".
     for g in stored().get("games", []):
-        names = g.get("sources") or [f'Ingen kanal hittad: {g["game"]}']
+        names = g.get("labels") or g.get("sources") or [f'Ingen kanal hittad: {g["game"]}']
         archive = g.get("archive", [])
         icons = g.get("icons", [])
         for v, name in enumerate(names[:MAX_SOURCES]):
@@ -251,6 +251,33 @@ def sources_for(game, streams, cats, tv=()):
     return picked[:min(MAX_SOURCES, len(broadcast) + MAX_RESERVES)], len(broadcast)
 
 
+def short_source(stream, tv_codes=()):
+    """Kort namn på kanalen/strömmen, t.ex. "TSN2", "RDS 2", "ESPN+ 097", "Telia SE"."""
+    name = stream.get("name", "").strip()
+    if tv_codes:                                   # tv-kanal: namnet utan land och bildkvalitet
+        short = re.sub(r"^[A-Z]{2,4}\|\s*", "", name)
+        short = re.sub(r"\s*\b(F?HD|UHD|4K)\b|[\u1d00-\u1dbf\u2070-\u209f]+", "", short).strip()
+        return short if len(short) <= 26 else tv_codes[0]
+    up = name.upper()
+    for rx, fmt in ((r"ESPN\+ (?:PPV )?(\d+)", "ESPN+ {}"), (r"TELIA ?(?:PLAY|F)?\s*(SE|NO|DK|FI)\b", "Telia {}"),
+                    (r"DISNEY\+ ?(SE|NO|DK|FI)\b", "Disney+ {}"), (r"\b(SE|NO|DK|FI): PLAY\+", "Viaplay {}"),
+                    (r"\((SE|NO|DK|FI)\)", "Ström {}"), (r"\b(US|CA): SOCCER PPV", "PPV {}")):
+        m = re.search(rx, up)
+        if m:
+            return fmt.format(m[1])
+    if re.match(r"NHL \| \d+", up):
+        return "NHL-flöde"
+    if up.startswith("NHL TEAM|"):
+        return "Lagkanal " + clean(name.split("|", 1)[1]).strip().title()
+    return "Ström"
+
+
+def label_of(game, stream, tv):
+    """Kanalnamn i listan: matchen först, sedan kanalen, t.ex. "MTL @ BOS · TSN2"."""
+    codes = next((t["codes"] for t in tv if t["real"] == stream["stream_id"]), ())
+    return f'{game["awayTeam"]["abbrev"]} @ {game["homeTeam"]["abbrev"]} · {short_source(stream, codes)}'
+
+
 def title_of(game):
     away, home = game["awayTeam"], game["homeTeam"]
     return f'{away["placeName"]["default"]} {away["commonName"]["default"]} @ {home["placeName"]["default"]} {home["commonName"]["default"]}'
@@ -332,7 +359,7 @@ def build(streams, cats, schedule=None):
         for v, s in enumerate(sources):
             mapping[str(virtual_id(slot, v))] = s["stream_id"]
         report.append({"slot": slot, "game": title_of(game), "start": game["startTimeUTC"],
-                       "sources": [s["name"] for s in sources], "main": main, "archive": [archive_days(s) for s in sources],
+                       "sources": [s["name"] for s in sources], "labels": [label_of(game, s, tv) for s in sources], "main": main, "archive": [archive_days(s) for s in sources],
                        "icons": [s.get("stream_icon") or "" for s in sources]})
     today = hockey_date()
     history = {d: m for d, m in stored().get("history", {}).items()
