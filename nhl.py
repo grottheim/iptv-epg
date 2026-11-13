@@ -223,14 +223,19 @@ def carries_game(stream_name, category, game):
     return not dates or bool(dates & allowed)
 
 
+def broadcast_tv(game, tv):
+    """Tv-kanalerna (poster ur tv-listan) som sänder matchen, i den ordning NHL anger dem."""
+    out = []
+    for b in game.get("tvBroadcasts", []):
+        out += [t for t in tv if broadcast_keys(game, b) & set(t["codes"]) and t not in out]
+    return out[:MAX_TV]
+
+
 def sources_for(game, streams, cats, tv=()):
     """(kanaler, antal tv-kanaler) för en match: först tv-kanalerna som sänder den, i samma ordning som
     NHL anger dem, sedan matchströmmar som reserver."""
-    real = []
-    for b in game.get("tvBroadcasts", []):
-        real += [t["real"] for t in tv if broadcast_keys(game, b) & set(t["codes"]) and t["real"] not in real]
     by_id = {s["stream_id"]: s for s in streams}
-    broadcast = [by_id[r] for r in real if r in by_id][:MAX_TV]
+    broadcast = [by_id[t["real"]] for t in broadcast_tv(game, tv) if t["real"] in by_id]
     hits = [s for s in streams if carries_game(s.get("name", ""), cats.get(s.get("category_id"), ""), game)]
 
     def rank(s):
@@ -272,10 +277,14 @@ def short_source(stream, tv_codes=()):
     return "Ström"
 
 
+def short_game(game):
+    return f'{game["awayTeam"]["abbrev"]} @ {game["homeTeam"]["abbrev"]}'
+
+
 def label_of(game, stream, tv):
-    """Kanalnamn i listan: matchen först, sedan kanalen, t.ex. "MTL @ BOS · TSN2"."""
+    """Kanalnamn i listan: bara kanalen, t.ex. "TSN2". Matchen står i tablån, som alltid är rätt för dagen."""
     codes = next((t["codes"] for t in tv if t["real"] == stream["stream_id"]), ())
-    return f'{game["awayTeam"]["abbrev"]} @ {game["homeTeam"]["abbrev"]} · {short_source(stream, codes)}'
+    return short_source(stream, codes)
 
 
 def title_of(game):
@@ -296,8 +305,39 @@ def broadcast_text(game, tv):
                      for b in game.get("tvBroadcasts", []))
 
 
+def game_window(date, game):
+    day_start = datetime.fromisoformat(date).replace(hour=DAY_START_UTC, tzinfo=timezone.utc)
+    start = datetime.fromisoformat(game["startTimeUTC"].replace("Z", "+00:00"))
+    day_end = day_start + timedelta(days=1)
+    return day_start, day_end, start, min(start + timedelta(hours=GAME_HOURS), day_end)
+
+
+def label_programme(p, entry):
+    """Sätter matchen först i titeln på ett program från en tv-kanals egen tablå."""
+    try:
+        start = datetime.strptime(p.get("start", "").strip(), "%Y%m%d%H%M%S %z")
+        stop = datetime.strptime(p.get("stop", "").strip(), "%Y%m%d%H%M%S %z")
+    except ValueError:
+        return
+    title = p.find("title")
+    if title is None:
+        title = ET.SubElement(p, "title")
+    if start < entry["stop"] and stop > entry["start"]:          # under matchen
+        title.text = f'{entry["short"]} · {title.text or ""}'
+        desc = p.find("desc")
+        if desc is None:
+            desc = ET.SubElement(p, "desc")
+        desc.text = entry["desc"] + (f"\n\n{desc.text}" if desc.text else "")
+    elif start < entry["start"]:                                  # före matchen samma dygn
+        title.text = f'{entry["local"]} {entry["short"]} · {title.text or ""}'
+
+
 def epg_elements(schedule=None):
-    """(kanalposter, programposter) för de fasta kanalerna, för hela veckans spelschema."""
+    """(kanalposter, programposter, tv-tablåer) för de fasta kanalerna, för hela veckans spelschema.
+
+    Matchkanaler som är en tv-kanal (TSN2, RDS …) får den kanalens egen tablå, med matchen först i titeln.
+    De byggs av make_playlist.py ur tv-tablåerna; här returneras bara vad som ska kopieras vart
+    (lista med {src, target, from, to, start, stop, short, local, desc})."""
     if schedule is None:                         # i går också, så att tablån räcker för catch-up
         yesterday = (datetime.fromisoformat(hockey_date()) - timedelta(days=1)).date().isoformat()
         schedule = {**fetch_schedule(yesterday), **fetch_schedule(hockey_date())}
@@ -313,38 +353,43 @@ def epg_elements(schedule=None):
             ch.tail = "\n"
             channels.append(ch)
 
-    def one_prog(slot, start, stop, title, desc=None):
-        out = []
-        for v in range(MAX_SOURCES):            # samma tablå på alla kanaler för matchen
-            p = ET.Element("programme", {"start": start.strftime("%Y%m%d%H%M%S +0000"),
-                                         "stop": stop.strftime("%Y%m%d%H%M%S +0000"), "channel": epg_id(slot, v)})
-            ET.SubElement(p, "title", {"lang": "en"}).text = title
-            if desc:
-                ET.SubElement(p, "desc", {"lang": "en"}).text = desc
-            p.tail = "\n"
-            out.append(p)
-        return out
+    def prog(slot, v, start, stop, title, desc=None):
+        p = ET.Element("programme", {"start": start.strftime("%Y%m%d%H%M%S +0000"),
+                                     "stop": stop.strftime("%Y%m%d%H%M%S +0000"), "channel": epg_id(slot, v)})
+        ET.SubElement(p, "title", {"lang": "en"}).text = title
+        if desc:
+            ET.SubElement(p, "desc", {"lang": "en"}).text = desc
+        p.tail = "\n"
+        return p
 
-    progs = []
+    progs, overlay = [], []
     for date, games in schedule.items():
-        day_start = datetime.fromisoformat(date).replace(hour=DAY_START_UTC, tzinfo=timezone.utc)
-        day_end = day_start + timedelta(days=1)
         for slot in range(1, MAX_GAMES + 1):
             if slot > len(games):
-                progs.extend(one_prog(slot, day_start, day_end, "No game"))
+                day_start = datetime.fromisoformat(date).replace(hour=DAY_START_UTC, tzinfo=timezone.utc)
+                progs += [prog(slot, v, day_start, day_start + timedelta(days=1), "No game")
+                          for v in range(MAX_SOURCES)]
                 continue
             game = games[slot - 1]
-            title = title_of(game)
-            start = datetime.fromisoformat(game["startTimeUTC"].replace("Z", "+00:00"))
-            stop = min(start + timedelta(hours=GAME_HOURS), day_end)
+            day_start, day_end, start, stop = game_window(date, game)
+            short, title = short_game(game), title_of(game)
             local = start.astimezone(SE_TZ)
-            desc = f"{local:%a %d %b %H:%M} svensk tid. TV: {broadcast_text(game, tv)}"
-            if start > day_start:
-                progs.extend(one_prog(slot, day_start, start, f"{local:%H:%M}  {title}", desc))
-            progs.extend(one_prog(slot, start, stop, title, desc))
-            if stop < day_end:
-                progs.extend(one_prog(slot, stop, day_end, f"Ended: {title}"))
-    return channels, progs
+            desc = f"{title}. {local:%a %d %b %H:%M} svensk tid. TV: {broadcast_text(game, tv)}"
+            entry = {"from": day_start, "to": day_end, "start": start, "stop": stop, "short": short,
+                     "local": f"{local:%H:%M}", "desc": desc}
+            # Tv-kanalens egen tablå på tv-gruppens kanal, med matchen först i titeln.
+            channels_tv = broadcast_tv(game, tv)
+            overlay += [{**entry, "src": t["epg"], "target": t["tvg"]} for t in channels_tv if t["epg"]]
+            for v in range(MAX_SOURCES):
+                if v < len(channels_tv) and channels_tv[v]["epg"]:
+                    overlay.append({**entry, "src": channels_tv[v]["epg"], "target": epg_id(slot, v)})
+                    continue
+                if start > day_start:
+                    progs.append(prog(slot, v, day_start, start, f"{local:%H:%M} {short} · {title}", desc))
+                progs.append(prog(slot, v, start, stop, f"{short} · {title}", desc))
+                if stop < day_end:
+                    progs.append(prog(slot, v, stop, day_end, f"Slut: {short}"))
+    return channels, progs, overlay
 
 
 def build(streams, cats, schedule=None):

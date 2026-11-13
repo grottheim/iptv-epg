@@ -92,9 +92,14 @@ def epg_countries():
     return [c.strip() for c in text.replace("\n", ",").split(",") if c.strip()]
 
 
-def copy_tv_programmes(out):
+def copy_tv_programmes(out, overlay=()):
     """Tablåerna för tv-kanalerna i gruppen "NHL - TV-KANALER", ur USA:s och Kanadas filer.
-    Bara de kanalernas program kopieras, så att EPG:n inte blir för tung för Apple TV."""
+    Bara de kanalernas program kopieras, så att EPG:n inte blir för tung för Apple TV.
+    `overlay` (från nhl.epg_elements) lägger dessutom tablån på matchkanalerna och sätter matchen
+    först i titeln på de dygn kanalen sänder en match."""
+    by_src = {}
+    for e in overlay:
+        by_src.setdefault(e["src"], []).append(e)
     tv = [t for t in nhl.stored().get("tv", []) if t["epg"] and t.get("tvg")]
     wanted = {}                                    # leverantörens EPG-id -> tv-gruppens egna id
     for t in tv:
@@ -115,12 +120,30 @@ def copy_tv_programmes(out):
             with urllib.request.urlopen(req, timeout=300) as r, gzip.GzipFile(fileobj=r) as src:
                 for _, el in ET.iterparse(src):
                     if el.tag == "programme":
-                        for tvg in wanted.get(el.get("channel"), []):
-                            for child in el.findall("category"):
-                                el.remove(child)
-                            el.set("channel", tvg)
-                            el.tail = "\n"
-                            out.write(ET.tostring(el, encoding="utf-8"))
+                        src = el.get("channel")
+                        for child in el.findall("category"):
+                            el.remove(child)
+                        el.tail = "\n"
+                        try:
+                            start = datetime.strptime(el.get("start", "").strip(), "%Y%m%d%H%M%S %z")
+                        except ValueError:
+                            start = None
+                        days = [e for e in by_src.get(src, []) if start and e["from"] <= start < e["to"]]
+                        for tvg in wanted.get(src, []):
+                            p = ET.fromstring(ET.tostring(el))
+                            p.set("channel", tvg)
+                            for e in days:
+                                if e["target"] == tvg:
+                                    nhl.label_programme(p, e)
+                            p.tail = "\n"
+                            out.write(ET.tostring(p, encoding="utf-8"))
+                        for e in days:
+                            if e["target"] not in wanted.get(src, []):
+                                p = ET.fromstring(ET.tostring(el))
+                                p.set("channel", e["target"])
+                                nhl.label_programme(p, e)
+                                p.tail = "\n"
+                                out.write(ET.tostring(p, encoding="utf-8"))
                         el.clear()
                     elif el.tag == "channel":
                         el.clear()
@@ -130,7 +153,7 @@ def copy_tv_programmes(out):
     return n
 
 
-def build_full_epg(gen_ch, gen_pr):
+def build_full_epg(gen_ch, gen_pr, overlay=()):
     """serve/epg-full.xml.gz: hela tablån för valda länder (från GitHub Pages) plus genererade NHL-tablåer.
     Filerna kopieras som text utan att tolkas, så att det ryms i minnet även på en liten server."""
     tmp = SERVE / "epg-full.tmp"
@@ -159,7 +182,7 @@ def build_full_epg(gen_ch, gen_pr):
                 n += 1
             except Exception as e:
                 print(f"VARNING: kunde inte hämta {url}: {e}")
-        n += copy_tv_programmes(out)
+        n += copy_tv_programmes(out, overlay)
         for el in gen_pr:
             out.write(ET.tostring(el, encoding="utf-8"))
         out.write(b"</tv>\n")
@@ -272,11 +295,11 @@ def main():
             ch.tail = "\n"
             stream_ch.append(ch)
     try:
-        nhl_ch, nhl_pr = nhl.epg_elements()
+        nhl_ch, nhl_pr, overlay = nhl.epg_elements()
     except Exception as e:                         # NHL:s schema nere: bygg resten ändå
         print(f"VARNING: NHL-schemat kunde inte hämtas: {e}")
-        nhl_ch, nhl_pr = [], []
-    full = build_full_epg(stream_ch + gen_ch + nhl_ch, gen_pr + nhl_pr)
+        nhl_ch, nhl_pr, overlay = [], [], []
+    full = build_full_epg(stream_ch + gen_ch + nhl_ch, gen_pr + nhl_pr, overlay)
     tmp = SERVE / "epg_ids.tmp"
     tmp.write_text(json.dumps(proxy_ids))
     tmp.replace(SERVE / "epg_ids.json")
