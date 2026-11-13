@@ -328,6 +328,9 @@ def label_programme(p, entry):
         if desc is None:
             desc = ET.SubElement(p, "desc")
         desc.text = entry["desc"] + (f"\n\n{desc.text}" if desc.text else "")
+    elif any(start < o["stop"] and stop > o["start"] for o in entry.get("others", [])):
+        other = next(o for o in entry["others"] if start < o["stop"] and stop > o["start"])
+        title.text = f'{other["short"]} · {title.text or ""}'   # kanalen visar en annan match just då
     elif start < entry["start"]:                                  # före matchen samma dygn
         title.text = f'{entry["local"]} {entry["short"]} · {title.text or ""}'
 
@@ -389,6 +392,10 @@ def epg_elements(schedule=None):
                 progs.append(prog(slot, v, start, stop, f"{short} · {title}", desc))
                 if stop < day_end:
                     progs.append(prog(slot, v, stop, day_end, f"Slut: {short}"))
+    # Samma tv-kanal kan sända flera matcher samma dygn (t.ex. Sportsnet): de andra matcherna märks med sitt namn.
+    for e in overlay:
+        e["others"] = [{"start": o["start"], "stop": o["stop"], "short": o["short"]} for o in overlay
+                       if o["src"] == e["src"] and o["from"] == e["from"] and o["short"] != e["short"]]
     return channels, progs, overlay
 
 
