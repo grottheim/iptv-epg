@@ -322,15 +322,18 @@ def label_programme(p, entry):
     title = p.find("title")
     if title is None:
         title = ET.SubElement(p, "title")
-    if start < entry["stop"] and stop > entry["start"]:          # under matchen
+    # Matchen som programmet överlappar mest (en kanal kan sända två matcher efter varandra).
+    games = [entry] + entry.get("others", [])
+    overlap = lambda g: (min(stop, g["stop"]) - max(start, g["start"])).total_seconds()
+    best = max(games, key=overlap)
+    if overlap(best) > 0 and best is not entry:               # kanalen visar en annan match just då
+        title.text = f'{best["short"]} · {title.text or ""}'
+    elif overlap(best) > 0:                                   # under matchen
         title.text = f'{entry["short"]} · {title.text or ""}'
         desc = p.find("desc")
         if desc is None:
             desc = ET.SubElement(p, "desc")
         desc.text = entry["desc"] + (f"\n\n{desc.text}" if desc.text else "")
-    elif any(start < o["stop"] and stop > o["start"] for o in entry.get("others", [])):
-        other = next(o for o in entry["others"] if start < o["stop"] and stop > o["start"])
-        title.text = f'{other["short"]} · {title.text or ""}'   # kanalen visar en annan match just då
     elif start < entry["start"]:                                  # före matchen samma dygn
         title.text = f'{entry["local"]} {entry["short"]} · {title.text or ""}'
 
