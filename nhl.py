@@ -236,6 +236,64 @@ def carries_game(stream_name, category, game):
     return not dates or bool(dates & allowed)
 
 
+def original_text(p):
+    """Titel och beskrivning utan det som label_programme lagt till (matchen först, vår beskrivning)."""
+    title = re.sub(r"^[A-Z]{2,3} @ [A-Z]{2,3} · | · sedan [A-Z]{2,3} @ [A-Z]{2,3} \d\d:\d\d$", "",
+                   p.findtext("title") or "")
+    desc = p.findtext("desc") or ""
+    if "svensk tid." in desc:
+        desc = desc.split("\n\n", 1)[1] if "\n\n" in desc else ""
+    return f"{title} {desc}"
+
+
+class ChannelEpg:
+    """Tv-gruppens tablåer (nhltvNN.tv) ur förra EPG-bygget, för att se vad kanalerna sänder under en match."""
+    path = SERVE / "epg-full.xml.gz"
+    mtime, data = None, {}
+
+    @classmethod
+    def get(cls):
+        try:
+            m = cls.path.stat().st_mtime
+        except OSError:
+            return {}
+        if m != cls.mtime:
+            import gzip
+            data = {}
+            try:
+                with gzip.open(cls.path) as f:
+                    for _, el in ET.iterparse(f):
+                        if el.tag == "programme" and el.get("channel", "").startswith("nhltv"):
+                            try:
+                                data.setdefault(el.get("channel"), []).append((
+                                    datetime.strptime(el.get("start"), "%Y%m%d%H%M%S %z"),
+                                    datetime.strptime(el.get("stop"), "%Y%m%d%H%M%S %z"),
+                                    original_text(el)))
+                            except (TypeError, ValueError):
+                                pass
+                        if el.tag in ("programme", "channel"):
+                            el.clear()
+            except (OSError, ET.ParseError):
+                return cls.data
+            cls.data, cls.mtime = data, m
+        return cls.data
+
+
+HOCKEY_WORDS = re.compile(r"\b(NHL|LNH|HOCKEY)\b", re.I)
+
+
+def shows_other(t, game):
+    """Sänder kanalen enligt sin egen tablå något annat än hockey mitt i matchen? (t.ex. basket på en
+    regional sportkanal när matchen flyttats till systerkanalen). Okänd tablå räknas inte som annat."""
+    start = datetime.fromisoformat(game["startTimeUTC"].replace("Z", "+00:00"))
+    mid = start + timedelta(minutes=75)
+    texts = [txt for a, b, txt in ChannelEpg.get().get(t.get("tvg"), []) if a <= mid < b]
+    if not texts:
+        return False
+    teams = [clean(x["commonName"]["default"]).strip() for x in (game["homeTeam"], game["awayTeam"])]
+    return not any(HOCKEY_WORDS.search(txt) or any(f" {n} " in clean(txt) for n in teams) for txt in texts)
+
+
 def broadcast_tv(game, tv):
     """Tv-kanalerna (poster ur tv-listan) som sänder matchen: rikstäckande först, sedan hemmalagets och
     bortalagets sportkanaler, lokala tv-stationer sist. Inom varje del gäller NHL:s ordning."""
@@ -245,7 +303,7 @@ def broadcast_tv(game, tv):
     out = []
     for b in sorted(game.get("tvBroadcasts", []), key=rank):
         out += [t for t in tv if broadcast_keys(game, b) & set(t["codes"]) and t not in out]
-    return out[:MAX_TV]
+    return [t for t in out if not shows_other(t, game)][:MAX_TV]
 
 
 def sources_for(game, streams, cats, tv=()):
@@ -353,7 +411,7 @@ def label_programme(p, entry):
             desc = ET.SubElement(p, "desc")
         desc.text = entry["desc"] + (f"\n\n{desc.text}" if desc.text else "")
     elif start < entry["start"]:                                  # före matchen samma dygn
-        title.text = f'{entry["local"]} {entry["short"]} · {title.text or ""}'
+        title.text = f'{title.text or ""} · sedan {entry["short"]} {entry["local"]}'
 
 
 def epg_elements(schedule=None):
