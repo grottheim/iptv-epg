@@ -66,6 +66,9 @@ TV_CHANNELS = [
     (("Utah16",), r"^TV\| SALT LAKE CITY, UT KUPX"), (("KDFI",), r"KDFI"),
     # Kod:lag = nätverket bara för det laget (Scripps sänder olika lag på olika lokalkanaler).
     (("SCRIPPS:VGK",), r"^US\| VEGAS34 \(KMCC\)"),
+    # Panthers på Scripps: WSFL 39 i Miami (heter numera The Spot South Florida 39). Predators-kanalen
+    # WNPX (The Spot Nashville 28) och Lightnings The Spot Tampa Bay finns inte hos leverantören.
+    (("SCRIPPS:FLA",), r"^US\| CW 39 WSFL MIAMI"),
 ]
 # Matchfeeds hos leverantören; bästa källan först. Kategorier blandas för att reserverna ska vara oberoende.
 # NHL-paketets flöden (NHL | 01 …) visar "Commercial Break" i pauserna och hamnar därför efter de andra.
@@ -110,7 +113,7 @@ def archive_fields(days):
 
 
 # Lokala tv-stationer (inte sportkanaler); de läggs sist bland en matchs tv-kanaler.
-LOCAL_TV = {"KONG", "KING", "KTVD", "KUSA", "KSTP", "KTTV", "Utah16", "KDFI", "SCRIPPS:VGK"}
+LOCAL_TV = {"KONG", "KING", "KTVD", "KUSA", "KSTP", "KTTV", "Utah16", "KDFI", "SCRIPPS:VGK", "SCRIPPS:FLA"}
 # Tablå för kanaler där leverantören saknar EPG-id (MSG Sportsnet hette tidigare MSG Plus).
 EPG_FALLBACK = {"MSGSN": "MadisonSquareGardenPlus.us"}
 
@@ -337,7 +340,7 @@ def short_source(stream, tv_codes=()):
     if tv_codes:                                   # tv-kanal: namnet utan land och bildkvalitet
         short = re.sub(r"^[A-Z]{2,4}\|\s*", "", name)
         short = re.sub(r"\s*\b(F?HD|UHD|4K)\b|[\u1d00-\u1dbf\u2070-\u209f]+", "", short).strip()
-        nice = {"Utah16": "UTAH 16 (KUPX)", "KONG": "KONG SEATTLE", "KTVD": "KTVD DENVER"}
+        nice = {"SCRIPPS:FLA": "WSFL 39 MIAMI", "Utah16": "UTAH 16 (KUPX)", "KONG": "KONG SEATTLE", "KTVD": "KTVD DENVER"}
         return nice.get(tv_codes[0]) or (short if len(short) <= 26 else tv_codes[0])
     up = name.upper()
     for rx, fmt in ((r"ESPN\+ (?:PPV )?(\d+)", "ESPN+ {}"), (r"TELIA ?(?:PLAY|F)?\s*(SE|NO|DK|FI)\b", "Telia {}"),
