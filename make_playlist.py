@@ -132,9 +132,9 @@ def copy_tv_programmes(out, overlay=()):
                         for tvg in wanted.get(src, []):
                             p = ET.fromstring(ET.tostring(el))
                             p.set("channel", tvg)
-                            for e in days:
-                                if e["target"] == tvg:
-                                    nhl.label_programme(p, e)
+                            own = next((e for e in days if e["target"] == tvg), None)
+                            if own:                    # en gång: label_programme väljer rätt match själv
+                                nhl.label_programme(p, own)
                             p.tail = "\n"
                             out.write(ET.tostring(p, encoding="utf-8"))
                         for e in days:

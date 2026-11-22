@@ -55,7 +55,7 @@ TV_CHANNELS = [
     (("TNT",), r"^US\| TNT HD$"), (("truTV",), r"^US\| TRUTV HD"), (("NHLN",), r"^US\| NHL NETWORK"),
     (("ESPN",), r"^US\| ESPN HD$"), (("ESPN2",), r"^US\| ESPN ?2 HD$"),
     (("NESN",), r"^US\| NESN HD$"), (("NESN+",), r"^US\| NESN PLUS"),
-    (("MSG",), r"^US\| MSG HD"), (("MSG 2", "MSG2"), r"^US\| MSG 2 HD"), (("MSGSN",), r"^TV\| MSG SPORTSNET"),
+    (("MSG",), r"^US\| MSG HD"), (("MSG 2", "MSG2"), r"^US\| MSG 2 HD"), (("MSGSN",), r"^(TV\| MSG SPORTSNET|US\| MSG PLUS)"),
     (("NBCSP",), r"^US\| NBC SPORTS PHILADELFIA"), (("NBCSCA",), r"^US\| NBC SPORTS CALIFORNIA$"),
     (("SN-PIT",), r"^US\| SPORTSNET PITTSBURGH"), (("MNMT",), r"^US\| MONUMENTAL SPORTS NETWORK"),
     (("CHSN",), r"^US\| CHICAGO SPORTS NETWORK HD"), (("DSN",), r"^US\| DETROIT SPORTSNET"),
@@ -109,17 +109,30 @@ def archive_fields(days):
     return {"tv_archive": 1 if days else 0, "tv_archive_duration": days or 0}
 
 
+# Lokala tv-stationer (inte sportkanaler); de läggs sist bland en matchs tv-kanaler.
+LOCAL_TV = {"KONG", "KING", "KTVD", "KUSA", "KSTP", "KTTV", "Utah16", "KDFI", "SCRIPPS:VGK"}
+# Tablå för kanaler där leverantören saknar EPG-id (MSG Sportsnet hette tidigare MSG Plus).
+EPG_FALLBACK = {"MSGSN": "MadisonSquareGardenPlus.us"}
+
+
 def find_tv(streams, cats):
     """Leverantörens kanal för varje tv-kanal i TV_CHANNELS: helst med EPG-id och i HD."""
+    try:                                         # EPG-id som mellanhanden fyller i (make_playlist.py)
+        filled = json.loads((SERVE / "epg_ids.json").read_text())
+    except (OSError, ValueError):
+        filled = {}
+
+    def epg_of(s):
+        return (s.get("epg_channel_id") or "").strip() or filled.get(str(s.get("stream_id")), "")
     out = []
     for i, (codes, rx) in enumerate(TV_CHANNELS):
         cands = [s for s in streams if re.search(rx, s.get("name", "").strip())
                  and not re.search(r"PPV|(?<!NHL) PACKAGE", cats.get(s.get("category_id"), ""))]
         if cands:
-            best = min(cands, key=lambda s: (not (s.get("epg_channel_id") or "").strip(), not archive_days(s),
-                                             "RAW" in clean(s["name"]), len(s["name"])))
+            best = min(cands, key=lambda s: (not epg_of(s), "RAW" in clean(s["name"]), not archive_days(s),
+                                             len(s["name"])))
             out.append({"id": TV_BASE_ID + i, "real": best["stream_id"], "name": best["name"].strip(),
-                        "epg": (best.get("epg_channel_id") or "").strip(), "icon": best.get("stream_icon") or "",
+                        "epg": epg_of(best) or EPG_FALLBACK.get(codes[0], ""), "icon": best.get("stream_icon") or "",
                         "codes": list(codes), "tvg": f"nhltv{i:02d}.tv", "archive": archive_days(best)})
     return out
 
@@ -224,9 +237,13 @@ def carries_game(stream_name, category, game):
 
 
 def broadcast_tv(game, tv):
-    """Tv-kanalerna (poster ur tv-listan) som sänder matchen, i den ordning NHL anger dem."""
+    """Tv-kanalerna (poster ur tv-listan) som sänder matchen: rikstäckande först, sedan hemmalagets och
+    bortalagets sportkanaler, lokala tv-stationer sist. Inom varje del gäller NHL:s ordning."""
+    def rank(b):
+        local = bool(broadcast_keys(game, b) & LOCAL_TV)
+        return local, {"N": 0, "H": 1, "A": 2}.get(b.get("market"), 1)
     out = []
-    for b in game.get("tvBroadcasts", []):
+    for b in sorted(game.get("tvBroadcasts", []), key=rank):
         out += [t for t in tv if broadcast_keys(game, b) & set(t["codes"]) and t not in out]
     return out[:MAX_TV]
 
@@ -262,7 +279,8 @@ def short_source(stream, tv_codes=()):
     if tv_codes:                                   # tv-kanal: namnet utan land och bildkvalitet
         short = re.sub(r"^[A-Z]{2,4}\|\s*", "", name)
         short = re.sub(r"\s*\b(F?HD|UHD|4K)\b|[\u1d00-\u1dbf\u2070-\u209f]+", "", short).strip()
-        return short if len(short) <= 26 else tv_codes[0]
+        nice = {"Utah16": "UTAH 16 (KUPX)", "KONG": "KONG SEATTLE", "KTVD": "KTVD DENVER"}
+        return nice.get(tv_codes[0]) or (short if len(short) <= 26 else tv_codes[0])
     up = name.upper()
     for rx, fmt in ((r"ESPN\+ (?:PPV )?(\d+)", "ESPN+ {}"), (r"TELIA ?(?:PLAY|F)?\s*(SE|NO|DK|FI)\b", "Telia {}"),
                     (r"DISNEY\+ ?(SE|NO|DK|FI)\b", "Disney+ {}"), (r"\b(SE|NO|DK|FI): PLAY\+", "Viaplay {}"),
@@ -360,8 +378,11 @@ def epg_elements(schedule=None):
             channels.append(ch)
 
     def prog(slot, v, start, stop, title, desc=None):
+        return prog_for(epg_id(slot, v), start, stop, title, desc)
+
+    def prog_for(channel, start, stop, title, desc=None):
         p = ET.Element("programme", {"start": start.strftime("%Y%m%d%H%M%S +0000"),
-                                     "stop": stop.strftime("%Y%m%d%H%M%S +0000"), "channel": epg_id(slot, v)})
+                                     "stop": stop.strftime("%Y%m%d%H%M%S +0000"), "channel": channel})
         ET.SubElement(p, "title", {"lang": "en"}).text = title
         if desc:
             ET.SubElement(p, "desc", {"lang": "en"}).text = desc
@@ -395,6 +416,33 @@ def epg_elements(schedule=None):
                 progs.append(prog(slot, v, start, stop, f"{short} · {title}", desc))
                 if stop < day_end:
                     progs.append(prog(slot, v, stop, day_end, f"Slut: {short}"))
+    # Tv-gruppens kanaler utan egen tablå: matcherna de sänder, ur NHL:s schema.
+    for t in tv:
+        if t["epg"]:
+            continue
+        ch = ET.Element("channel", {"id": t["tvg"]})
+        ET.SubElement(ch, "display-name").text = t["tvg"]
+        if t.get("icon"):
+            ET.SubElement(ch, "icon", {"src": t["icon"]})
+        ch.tail = "\n"
+        channels.append(ch)
+        for date, games in schedule.items():
+            day_start = datetime.fromisoformat(date).replace(hour=DAY_START_UTC, tzinfo=timezone.utc)
+            pos = day_start
+            for game in games:
+                if t not in broadcast_tv(game, tv):
+                    continue
+                _, day_end, start, stop = game_window(date, game)
+                if start < pos:
+                    continue
+                short, title = short_game(game), title_of(game)
+                desc = f"{title}. {start.astimezone(SE_TZ):%a %d %b %H:%M} svensk tid."
+                if start > pos:
+                    progs.append(prog_for(t["tvg"], pos, start, f"{start.astimezone(SE_TZ):%H:%M} {short}", desc))
+                progs.append(prog_for(t["tvg"], start, stop, f"{short} · {title}", desc))
+                pos = stop
+            if pos < day_start + timedelta(days=1):
+                progs.append(prog_for(t["tvg"], pos, day_start + timedelta(days=1), "Ingen NHL-match"))
     # Samma tv-kanal kan sända flera matcher samma dygn (t.ex. Sportsnet): de andra matcherna märks med sitt namn.
     for e in overlay:
         e["others"] = [{"start": o["start"], "stop": o["stop"], "short": o["short"]} for o in overlay
