@@ -49,6 +49,15 @@ PROVIDER_ID_FIX = {
     "CBSN.us": "CBSEast_WCBS.us",                         # US| CBS HD
 }
 
+# Kanaler som den automatiska kopplingen inte hittar, men som behövs (t.ex. för NHL-kanalerna i nhl.py):
+# id -> post i mapping.json. Läggs till när landet byggs om.
+MANUAL = {
+    "AltitudeSports2.us": {"name": "ALTITUDE SPORTS 2 HD", "country": "us", "streams": 1, "sources": [
+        ["iptvepg-us", "AltitudeSports2.us"], ["epgshare-US2", "Altitude.Sports.2.HD.us2"]]},
+    "MYKTVD.us": {"name": "MY 20 KTVD DENVER", "country": "us", "streams": 1, "sources": [
+        ["iptvepg-us", "MYKTVD.us"], ["epgshare-US_LOCALS1", "KTVD-DT.us_locals1"]]},
+}
+
 # Regionala varianter som ska få samma tablå som huvudkanalen.
 REGIONAL = {
     "se": (re.compile(r"^svt1(dalarna|gavleborg|jamtland|jonkoping|norrbotten|skane|smaland|"
@@ -175,6 +184,9 @@ def main():
             if not eid:
                 t.setdefault("stream_ids", []).append(str(s["stream_id"]))
         print(f"   {dict(stat)}")
+        for tid, t in MANUAL.items():
+            if t["country"] == country:
+                targets.setdefault(tid, json.loads(json.dumps(t)))
 
     out.write_text(json.dumps(targets, ensure_ascii=False, indent=1))
     (ROOT / "cache" / "unmatched.json").write_text(

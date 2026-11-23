@@ -103414,5 +103414,35 @@
   "stream_ids": [
    "1143977"
   ]
+ },
+ "AltitudeSports2.us": {
+  "name": "ALTITUDE SPORTS 2 HD",
+  "country": "us",
+  "streams": 1,
+  "sources": [
+   [
+    "iptvepg-us",
+    "AltitudeSports2.us"
+   ],
+   [
+    "epgshare-US2",
+    "Altitude.Sports.2.HD.us2"
+   ]
+  ]
+ },
+ "MYKTVD.us": {
+  "name": "MY 20 KTVD DENVER",
+  "country": "us",
+  "streams": 1,
+  "sources": [
+   [
+    "iptvepg-us",
+    "MYKTVD.us"
+   ],
+   [
+    "epgshare-US_LOCALS1",
+    "KTVD-DT.us_locals1"
+   ]
+  ]
  }
 }

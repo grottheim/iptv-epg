@@ -116,7 +116,7 @@ def archive_fields(days):
 # Lokala tv-stationer (inte sportkanaler); de läggs sist bland en matchs tv-kanaler.
 LOCAL_TV = {"KONG", "KING", "KTVD", "KUSA", "KSTP", "KTTV", "Utah16", "KDFI", "SCRIPPS:VGK", "SCRIPPS:FLA"}
 # Tablå för kanaler där leverantören saknar EPG-id (MSG Sportsnet hette tidigare MSG Plus).
-EPG_FALLBACK = {"MSGSN": "MadisonSquareGardenPlus.us"}
+EPG_FALLBACK = {"MSGSN": "MadisonSquareGardenPlus.us", "ALT2": "AltitudeSports2.us", "KTVD": "MYKTVD.us"}
 
 
 def find_tv(streams, cats):
