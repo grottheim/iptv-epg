@@ -299,6 +299,12 @@ def main():
     except Exception as e:                         # NHL:s schema nere: bygg resten ändå
         print(f"VARNING: NHL-schemat kunde inte hämtas: {e}")
         nhl_ch, nhl_pr, overlay = [], [], []
+    try:
+        import swe
+        swe_ch, swe_pr = swe.epg_elements()
+        nhl_ch, nhl_pr = nhl_ch + swe_ch, nhl_pr + swe_pr
+    except Exception as e:                         # svenska ligornas schema nere: bygg resten ändå
+        print(f"VARNING: svenska ligornas tablåer kunde inte byggas: {e}")
     full = build_full_epg(stream_ch + gen_ch + nhl_ch, gen_pr + nhl_pr, overlay)
     tmp = SERVE / "epg_ids.tmp"
     tmp.write_text(json.dumps(proxy_ids))

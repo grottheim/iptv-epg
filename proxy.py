@@ -7,6 +7,7 @@
 - /live/ /movie/ /series/ /timeshift/ …   -> omdirigeras till leverantören (videon går aldrig via mellanhanden)
 - /health                                 -> hälsokontroll för övervakningen (ingen inloggning, inga hemligheter)
 - NHL 01, NHL 02 …                        -> fasta kanaler som omdirigeras till kanalen med matchen (se nhl.py)
+- SHL, HockeyAllsvenskan, Allsvenskan      -> samma sak för svenska ligor (se swe.py)
 
 Bara det användarnamn som står i .env släpps igenom, så att servern inte blir en öppen proxy.
 Användning:  python3 proxy.py [--port 8080]
@@ -23,6 +24,7 @@ import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import nhl
+import swe
 from analyze import load_env
 from epgcommon import ROOT, UA
 
@@ -82,6 +84,13 @@ class Handler(BaseHTTPRequestHandler):
                 return r.status, r.read(), r.headers.get("Content-Type", "application/json")
         except urllib.error.HTTPError as e:
             return e.code, e.read(), e.headers.get("Content-Type", "text/plain")
+
+    @staticmethod
+    def resolve(stream_id, when=None):
+        """Riktig kanal för en virtuell kanal (NHL eller svensk liga)."""
+        if swe.owns(stream_id):
+            return swe.resolve(stream_id, when)
+        return nhl.resolve(stream_id, when)
 
     @staticmethod
     def timeshift_start(text):
@@ -144,21 +153,21 @@ class Handler(BaseHTTPRequestHandler):
             path = self.path
             virtual = re.fullmatch(r"(/live/[^/]+/[^/]+/)(99\d{7})(\.\w+)?", url.path)
             if virtual:                            # NHL-kanal: skicka till kanalen som har matchen nu
-                real = nhl.resolve(virtual[2])
+                real = self.resolve(virtual[2])
                 if not real:
                     return self.send(404, b'{"error":"no source"}')
                 path = f"{virtual[1]}{real}{virtual[3] or ''}"
             # Catch-up på NHL-kanal: /timeshift/<user>/<pass>/<min>/<start>/<id>.ts
             shift = re.fullmatch(r"(/timeshift/[^/]+/[^/]+/\d+/)([\d:-]+)/(99\d{7})(\.\w+)?", url.path)
             if shift:
-                real = nhl.resolve(shift[3], self.timeshift_start(shift[2]))
+                real = self.resolve(shift[3], self.timeshift_start(shift[2]))
                 if not real:
                     return self.send(404, b'{"error":"no source"}')
                 path = f"{shift[1]}{shift[2]}/{real}{shift[4] or ''}"
             # … eller /streaming/timeshift.php?stream=<id>&start=<start>&duration=<min>
             stream = query.get("stream", [""])[0]
             if url.path == "/streaming/timeshift.php" and re.fullmatch(r"99\d{7}", stream):
-                real = nhl.resolve(stream, self.timeshift_start(query.get("start", [""])[0]))
+                real = self.resolve(stream, self.timeshift_start(query.get("start", [""])[0]))
                 if not real:
                     return self.send(404, b'{"error":"no source"}')
                 path = self.path.replace(f"stream={stream}", f"stream={real}")
@@ -175,8 +184,9 @@ class Handler(BaseHTTPRequestHandler):
         if url.path == "/player_api.php":
             action = query.get("action", [""])[0]
             category = query.get("category_id", [""])[0]
-            if action == "get_live_streams" and category in (nhl.CATEGORY_ID, nhl.CATEGORY_B, nhl.CATEGORY_TV):
-                only = [x for x in nhl.virtual_streams() if x["category_id"] == category]
+            if action == "get_live_streams" and (category in (nhl.CATEGORY_ID, nhl.CATEGORY_B, nhl.CATEGORY_TV)
+                                                 or category in swe.categories()):
+                only = [x for x in nhl.virtual_streams() + swe.virtual_streams() if x["category_id"] == category]
                 return self.send(200, json.dumps(only).encode())
             status, body, ctype = self.upstream()
             if status == 200 and not action:           # inloggning: låt UHF bygga alla adresser mot mellanhanden
@@ -190,7 +200,7 @@ class Handler(BaseHTTPRequestHandler):
                     pass
             if status == 200 and action == "get_live_categories":
                 try:
-                    body = json.dumps(nhl.virtual_categories() + json.loads(body),
+                    body = json.dumps(nhl.virtual_categories() + swe.virtual_categories() + json.loads(body),
                                       ensure_ascii=False, separators=(",", ":")).encode()
                 except ValueError:
                     pass
@@ -204,7 +214,7 @@ class Handler(BaseHTTPRequestHandler):
                             if tid:
                                 s["epg_channel_id"] = tid
                     if not category:
-                        streams = nhl.virtual_streams() + streams
+                        streams = nhl.virtual_streams() + swe.virtual_streams() + streams
                     body = json.dumps(streams, ensure_ascii=False, separators=(",", ":")).encode()
                     ctype = "application/json"
                 except ValueError:

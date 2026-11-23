@@ -539,13 +539,19 @@ def main():
     from analyze import api, load_env
     env = load_env()
     cats = {c["category_id"]: c["category_name"] for c in api(env, "get_live_categories")}
-    data = build(api(env, "get_live_streams"), cats)
+    streams = api(env, "get_live_streams")
+    data = build(streams, cats)
     SERVE.mkdir(exist_ok=True)
     tmp = SERVE / "nhl.tmp"
     tmp.write_text(json.dumps(data, ensure_ascii=False, indent=1))
     tmp.replace(MAP_FILE)
     print(f'{len(data["tv"])} tv-kanaler: ' + ", ".join(t["name"] for t in data["tv"]))
     print(f'{data["date"]}: {len(data["games"])} matcher, {sum(bool(g["sources"]) for g in data["games"])} med källa')
+    try:                                         # svenska ligor (swe.py) med samma kanallista
+        import swe
+        swe.update(streams, cats)
+    except Exception as e:
+        print(f"VARNING: svenska ligorna kunde inte uppdateras: {e}")
     for g in data["games"]:
         print(f'  NHL {g["slot"]:02d} {g["start"]} {g["game"]}')
         for n in g["sources"]:
