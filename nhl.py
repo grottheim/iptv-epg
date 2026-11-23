@@ -72,7 +72,8 @@ TV_CHANNELS = [
 ]
 # Matchfeeds hos leverantören; bästa källan först. Kategorier blandas för att reserverna ska vara oberoende.
 # NHL-paketets flöden (NHL | 01 …) visar "Commercial Break" i pauserna och hamnar därför efter de andra.
-SOURCE_ORDER = [r"^US\| ESPN", r"^CA\|", r"^US\|(?! NHL PACKAGE)", r"DAZN|SOCCER", r"NHL", r"^SWEDEN", r"."]
+# PPV-strömmarna i fotbollskategorierna (PPV CA …) startar ofta inte alls och ligger därför sist.
+SOURCE_ORDER = [r"^US\| ESPN", r"^CA\|", r"^US\|(?! NHL PACKAGE)", r"DAZN", r"NHL", r"^SWEDEN", r"SOCCER", r"."]
 OTHER_SPORT = re.compile(r"\b(NFL|NBA|MLB|WNBA|NCAA|RUGBY|BASKETBALL|FOOTBALL|SOCCER:|AHL|OHL|WHL|QMJHL|JR)\b")
 LOWER_LEAGUE_CAT = re.compile(r"AHL|OHL|WHL|QMJHL|HOCKEY LEAGUE|FLO |NFL|NBA|MLB|NCAA", re.I)
 MONTHS = {m: i + 1 for i, m in enumerate("JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC".split())}
