@@ -124,6 +124,7 @@ class Handler(BaseHTTPRequestHandler):
         days_left = round((int(exp) - now) / 86400) if str(exp or "").isdigit() else None
         result = {
             "nhl_age_min": age("nhl.json"), "epg_age_min": age("epg-full.xml.gz"),
+            "epg_build_age_min": age("epg/epg-us.xml.gz"),
             "provider_status": info.get("status") or info.get("error"), "account_days_left": days_left,
         }
         problems = []
@@ -131,6 +132,8 @@ class Handler(BaseHTTPRequestHandler):
             problems.append("NHL-kopplingen uppdateras inte")
         if result["epg_age_min"] is None or result["epg_age_min"] > 240:
             problems.append("EPG:n uppdateras inte")
+        if result["epg_build_age_min"] is None or result["epg_build_age_min"] > 30 * 60:
+            problems.append("Serverns eget EPG-bygge (iptv-epg.org) fungerar inte")
         if result["provider_status"] != "Active":
             problems.append("IPTV-kontot svarar inte eller är inte aktivt")
         if days_left is not None and days_left < 7:

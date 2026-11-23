@@ -4,14 +4,18 @@
 För varje kanal väljs den källa som räcker längst framåt i tiden. Resultatet blir en fil
 per land (docs/epg-<land>.xml.gz) plus en fil med allt (docs/epg-alla.xml.gz).
 
-Användning:  python3 build_epg.py [--days 7] [--out docs]
+Användning:  python3 build_epg.py [--days 7] [--out docs] [--countries se,us]
+
+Med --countries byggs bara de länderna (ingen samlad fil eller indexsida). Det används på servern, som
+bygger Sverige, USA och Kanada själv eftersom iptv-epg.org spärrar GitHubs servrar.
 """
 import argparse
 import gzip
+import html
 import json
 import tempfile
 import xml.etree.ElementTree as ET
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -41,10 +45,21 @@ OTHER_STOP = set("och är att med för på av som det ett til og er af der die u
                  "le la les des et est pour il el los las del que por di che non per ja ei".split())
 
 
+# Program sparas som färdig XML-text (inte som element) för att bygget ska rymmas i lite minne.
+# Kanal-id:t är en platshållare som byts mot rätt id när filen skrivs.
+Prog = namedtuple("Prog", "start stop xml")
+CH_MARK = b'channel="@@CH@@"'
+
+
+def with_channel(p, tid):
+    return p.xml.replace(CH_MARK, b'channel="' + html.escape(tid, quote=True).encode() + b'"', 1)
+
+
 def is_english(plist):
     """Avgör språket på programtexterna (källornas lang-märkning är opålitlig)."""
+    els = [ET.fromstring(x.xml) for x in plist[:60]]
     words = re.findall(r"[a-zåäöæøéü]+", " ".join(
-        (x.findtext("title") or "") + " " + (x.findtext("desc") or "") for x in plist[:60]).lower())
+        (x.findtext("title") or "") + " " + (x.findtext("desc") or "") for x in els).lower())
     if len(words) < 40:
         return False
     en = sum(w in EN_STOP for w in words)
@@ -53,7 +68,7 @@ def is_english(plist):
 
 
 def last_stop(plist):
-    return max((parse_time(x.get("stop")) for x in plist), default=EPOCH)
+    return max((parse_time(x.stop) or EPOCH for x in plist), default=EPOCH)
 
 
 def pick(t, progs, now):
@@ -71,7 +86,7 @@ def pick(t, progs, now):
     if en is best:
         return best
     end = last_stop(en)
-    return en + [x for x in best if parse_time(x.get("start")) >= end]
+    return en + [x for x in best if (parse_time(x.start) or EPOCH) >= end]
 
 
 def parse_time(s):
@@ -86,8 +101,8 @@ def write_xmltv(path, channels, progs):
         f.write(b'<?xml version="1.0" encoding="utf-8"?>\n<tv generator-info-name="IPTV EPG merge">\n')
         for el in channels:
             f.write(ET.tostring(el, encoding="utf-8"))
-        for el in progs:
-            f.write(ET.tostring(el, encoding="utf-8"))
+        for xml in progs:                        # färdig XML-text (with_channel)
+            f.write(xml)
         f.write(b"</tv>\n")
 
 
@@ -111,9 +126,13 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--days", type=float, default=7, help="hur många dygn framåt som tas med")
     ap.add_argument("--out", default=str(ROOT / "docs"))
+    ap.add_argument("--countries", default="", help="kommaseparerade länder; tomt = alla")
     args = ap.parse_args()
 
     mapping = json.loads((ROOT / "mapping.json").read_text())
+    only = {c.strip() for c in args.countries.split(",") if c.strip()}
+    if only:
+        mapping = {k: v for k, v in mapping.items() if v["country"] in only}
     wanted = defaultdict(set)                    # källa -> källans kanal-id som behövs
     for t in mapping.values():
         for key, sid in t["sources"]:
@@ -129,7 +148,11 @@ def main():
             path = Path(tmp) / f"{key}.xml"
             try:
                 download(urls[key], path)
-                for _, el in ET.iterparse(path):
+                context = ET.iterparse(path, events=("start", "end"))
+                _, root = next(context)
+                for event, el in context:
+                    if event != "end":
+                        continue
                     if el.tag == "programme":
                         cid = el.get("channel")
                         start, stop = parse_time(el.get("start")), parse_time(el.get("stop"))
@@ -140,11 +163,12 @@ def main():
                                 if child.tag not in KEEP:
                                     el.remove(child)
                             el.tail = "\n"
-                            progs[(key, cid)].append(el)
-                        else:
-                            el.clear()
+                            el.set("channel", "@@CH@@")
+                            progs[(key, cid)].append(Prog(el.get("start"), el.get("stop"),
+                                                          ET.tostring(el, encoding="utf-8")))
+                        root.clear()                  # släpp allt som lästs, så minnet inte växer
                     elif el.tag == "channel":
-                        el.clear()
+                        root.clear()
             except Exception as e:                # en trasig källa ska inte stoppa bygget
                 print(f"VARNING: {key}: {e}")
             finally:
@@ -165,14 +189,8 @@ def main():
         ch.tail = "\n"
         chans, plist = by_country[t["country"]]
         chans.append(ch)
-        for p in sorted(best, key=lambda x: x.get("start")):
-            # Samma källkanal kan delas av flera mål-id: kopiera i så fall elementet.
-            if p.get("channel") != tid and p.get("_used"):
-                p = ET.fromstring(ET.tostring(p))
-                p.tail = "\n"
-            p.set("_used", "1")
-            p.set("channel", tid)
-            plist.append(p)
+        for p in sorted(best, key=lambda x: x.start):
+            plist.append(with_channel(p, tid))
 
         if t["country"] in EXTRA_ID_COUNTRIES:
             for alt in t.get("names", []) + t.get("stream_ids", []):
@@ -181,15 +199,7 @@ def main():
                 ach.tail = "\n"
                 chans.append(ach)
                 for p in best:
-                    c = ET.fromstring(ET.tostring(p))
-                    c.tail = "\n"
-                    c.set("channel", alt)
-                    c.attrib.pop("_used", None)
-                    plist.append(c)
-
-    for _, plist in by_country.values():
-        for p in plist:
-            p.attrib.pop("_used", None)
+                    plist.append(with_channel(p, alt))
 
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -198,12 +208,14 @@ def main():
         write_xmltv(out / f"epg-{country}.xml.gz", chans, plist)
         all_ch += chans
         all_pr += plist
-    write_xmltv(out / "epg-alla.xml.gz", all_ch, all_pr)
+    if not only:
+        write_xmltv(out / "epg-alla.xml.gz", all_ch, all_pr)
     # Den ursprungliga adressen behålls för Sverige, så att befintliga UHF-inställningar fortsätter fungera.
     if "se" in by_country:
         write_xmltv(out / "epg.xml.gz", *by_country["se"])
 
-    write_index(out, {c: len(v[0]) for c, v in by_country.items()})
+    if not only:
+        write_index(out, {c: len(v[0]) for c, v in by_country.items()})
     print(f"\n{len(all_ch)} kanaler, {len(all_pr)} program ({empty} kanaler utan data just nu)")
     for f in sorted(out.glob("*.xml.gz")):
         print(f"  {f.name:22} {f.stat().st_size / 1e6:6.1f} MB")

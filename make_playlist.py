@@ -12,6 +12,7 @@ import json
 import re
 import subprocess
 import sys
+import time
 import urllib.request
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
@@ -22,6 +23,10 @@ from analyze import api, load_env
 from epgcommon import COUNTRIES, ROOT, UA, category_matcher
 
 BASE_URL = "https://grottheim.github.io/iptv-epg/"
+# Länder som servern bygger själv (iptv-epg-update.service, build_epg.py --countries). Används före
+# GitHub Pages så länge filen är färskare än LOCAL_MAX_AGE.
+LOCAL_EPG = ROOT / "serve" / "epg"
+LOCAL_MAX_AGE = 30 * 3600
 PORT = 8765
 SERVE = ROOT / "serve"
 
@@ -78,6 +83,19 @@ def game_times(name, now):
     return None
 
 
+def epg_file(c):
+    """(namn, öppnad binär ström) för landets EPG-fil: serverns egen om den är färsk, annars GitHub Pages."""
+    name = "epg.xml.gz" if c == "se" else f"epg-{c}.xml.gz"
+    local = LOCAL_EPG / f"epg-{c}.xml.gz"
+    try:
+        if time.time() - local.stat().st_mtime < LOCAL_MAX_AGE:
+            return str(local), open(local, "rb")
+    except OSError:
+        pass
+    req = urllib.request.Request(BASE_URL + name, headers={"User-Agent": UA})
+    return BASE_URL + name, urllib.request.urlopen(req, timeout=300)
+
+
 def fetch_xmltv(url):
     req = urllib.request.Request(url, headers={"User-Agent": UA})
     with urllib.request.urlopen(req, timeout=300) as r:
@@ -114,10 +132,10 @@ def copy_tv_programmes(out, overlay=()):
     for c in ("us", "ca"):
         if c in epg_countries():
             continue
-        url = BASE_URL + f"epg-{c}.xml.gz"
+        url = c
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": UA})
-            with urllib.request.urlopen(req, timeout=300) as r, gzip.GzipFile(fileobj=r) as src:
+            url, r = epg_file(c)
+            with r, gzip.GzipFile(fileobj=r) as src:
                 for _, el in ET.iterparse(src):
                     if el.tag == "programme":
                         src = el.get("channel")
@@ -163,10 +181,10 @@ def build_full_epg(gen_ch, gen_pr, overlay=()):
         for el in gen_ch:                          # kanalposter först, som i leverantörens EPG
             out.write(ET.tostring(el, encoding="utf-8"))
         for c in epg_countries():
-            url = BASE_URL + ("epg.xml.gz" if c == "se" else f"epg-{c}.xml.gz")
+            url = c
             try:
-                req = urllib.request.Request(url, headers={"User-Agent": UA})
-                with urllib.request.urlopen(req, timeout=300) as r, gzip.GzipFile(fileobj=r) as src:
+                url, r = epg_file(c)
+                with r, gzip.GzipFile(fileobj=r) as src:
                     # Bara programmen kopieras; kanalposterna skrivs ovan, en per ström.
                     for line in src:
                         if line.startswith((b"<?xml", b"<tv", b"<channel ")):
@@ -258,9 +276,12 @@ def main():
     tv = ET.Element("tv", {"generator-info-name": "IPTV EPG-fix"})
     progs = []
     for c in countries:
-        url = BASE_URL + ("epg.xml.gz" if c == "se" else f"epg-{c}.xml.gz")
+        url = c
         try:
-            root = fetch_xmltv(url)
+            url, r = epg_file(c)
+            with r:
+                data = r.read()
+            root = ET.fromstring(gzip.decompress(data) if data[:2] == b"\x1f\x8b" else data)
         except Exception as e:
             print(f"VARNING: kunde inte hämta {url}: {e}")
             continue
