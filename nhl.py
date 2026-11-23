@@ -319,6 +319,8 @@ def sources_for(game, streams, cats, tv=()):
 
     def rank(s):
         cat = cats.get(s.get("category_id"), "")
+        if "SOCCER" in cat.upper():                # t.ex. "CA| SOCCER PPV": opålitliga, sist
+            return SOURCE_ORDER.index(r"SOCCER")
         return next(i for i, rx in enumerate(SOURCE_ORDER) if re.search(rx, cat))
     hits.sort(key=rank)
     picked, used = list(broadcast), set()
