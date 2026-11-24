@@ -219,10 +219,41 @@ def dates_in(name):
     return found
 
 
+# Sportsnet+ (SN+): "CA (SN+ 011) | Los Angeles @ Montreal (2026-11-23 19:00:15)", ibland med prefix som
+# "French Language Broadcast: ". Bara städerna står med, och samma kategori har basket ("Utah @ Los Angeles
+# Lakers"), så varje sida måste vara exakt lagets stad och/eller lagnamn.
+SNPLUS = re.compile(r"\(SN\+ \d+\)\s*\|\s*(?:[^|:@]*:\s*)?(.+?)\s+@\s+(.+?)\s*(?:\(\d{4}-\d\d-\d\d[^)]*\))?\s*$")
+
+
+def is_team(side, team):
+    s = clean(side).strip()
+    place = clean(team["placeName"]["default"]).strip()
+    common = clean(team["commonName"]["default"]).strip()
+    ok = {common, f"{place} {common}", team["abbrev"]} | set(EXTRA_NAMES.get(team["abbrev"], []))
+    if place != "NEW YORK":                     # delas av två lag
+        ok.add(place)
+    return s in ok
+
+
+def match_date_ok(stream_name, game):
+    start = datetime.fromisoformat(game["startTimeUTC"].replace("Z", "+00:00"))
+    dates = dates_in(stream_name)
+    allowed = {(d.month, d.day) for d in (start, start.astimezone(SE_TZ), start - timedelta(hours=5))}
+    return not dates or bool(dates & allowed)
+
+
+def is_snplus(stream_name):
+    return bool(re.search(r"\(SN\+ \d+\)", stream_name))
+
+
 def carries_game(stream_name, category, game):
     """Är det här kanalen för matchen? Båda lagen måste nämnas, och ett eventuellt datum måste stämma."""
     if re.match(r"\s*(END|ENDED)\b", stream_name, re.I) or "NO EVENT" in stream_name.upper() or "•" in stream_name:
         return False
+    m = SNPLUS.search(stream_name)
+    if m:
+        return (is_team(m[1], game["awayTeam"]) and is_team(m[2], game["homeTeam"])
+                and match_date_ok(stream_name, game))
     if LOWER_LEAGUE_CAT.search(category):
         if not re.match(r"^US\| NHL", category):
             return False
@@ -234,10 +265,7 @@ def carries_game(stream_name, category, game):
         strong, weak = team_names(team)
         if not (has(name, strong) or (is_nhl and has(name, weak))):
             return False
-    start = datetime.fromisoformat(game["startTimeUTC"].replace("Z", "+00:00"))
-    dates = dates_in(stream_name)
-    allowed = {(d.month, d.day) for d in (start, start.astimezone(SE_TZ), start - timedelta(hours=5))}
-    return not dates or bool(dates & allowed)
+    return match_date_ok(stream_name, game)
 
 
 def original_text(p):
@@ -323,10 +351,15 @@ def sources_for(game, streams, cats, tv=()):
             return SOURCE_ORDER.index(r"SOCCER")
         return next(i for i, rx in enumerate(SOURCE_ORDER) if re.search(rx, cat))
     hits.sort(key=rank)
+    # NHL anger ibland strömningstjänsten Sportsnet+ som sändare; dess engelska ström räknas då som
+    # huvudkanal, efter tv-kanalerna.
+    if any(b.get("network", "").strip() == "SN+" for b in game.get("tvBroadcasts", [])):
+        sn = [s for s in hits if is_snplus(s.get("name", "")) and "FRENCH" not in s["name"].upper()]
+        broadcast += sn[:1]
     picked, used = list(broadcast), set()
     for s in hits:                               # först en per kategori …
         cat = s.get("category_id")
-        if cat not in used:
+        if cat not in used and s not in picked:
             used.add(cat)
             picked.append(s)
     picked += [s for s in hits if s not in picked]   # … sedan resten
@@ -346,6 +379,9 @@ def short_source(stream, tv_codes=()):
         nice = {"SCRIPPS:FLA": "WSFL 39 MIAMI", "Utah16": "UTAH 16 (KUPX)", "KONG": "KONG SEATTLE", "KTVD": "KTVD DENVER"}
         return nice.get(tv_codes[0]) or (short if len(short) <= 26 else tv_codes[0])
     up = name.upper()
+    m = re.search(r"\(SN\+ (\d+)\)", up)
+    if m:
+        return f"SN+ {m[1]}" + (" (franska)" if "FRENCH" in up else "")
     for rx, fmt in ((r"ESPN\+ (?:PPV )?(\d+)", "ESPN+ {}"), (r"TELIA ?(?:PLAY|F)?\s*(SE|NO|DK|FI)\b", "Telia {}"),
                     (r"DISNEY\+ ?(SE|NO|DK|FI)\b", "Disney+ {}"), (r"\b(SE|NO|DK|FI): PLAY\+", "Viaplay {}"),
                     (r"\((SE|NO|DK|FI)\)", "Ström {}"), (r"\b(US|CA): SOCCER PPV", "PPV {}")):
