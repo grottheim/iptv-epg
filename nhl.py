@@ -69,6 +69,9 @@ TV_CHANNELS = [
     # Panthers på Scripps: WSFL 39 i Miami (heter numera The Spot South Florida 39). Predators-kanalen
     # WNPX (The Spot Nashville 28) och Lightnings The Spot Tampa Bay finns inte hos leverantören.
     (("SCRIPPS:FLA",), r"^US\| CW 39 WSFL MIAMI"),
+    # MSG Sportsnet 2 (t.ex. Devils när MSGSN visar Islanders) heter "MSG 2 PLUS" hos leverantören
+    # (kontrollerat med stillbild 2026-11-26).
+    (("MSGSN2",), r"^US\| MSG 2 PLUS HD"),
 ]
 # Matchfeeds hos leverantören; bästa källan först. Kategorier blandas för att reserverna ska vara oberoende.
 # NHL-paketets flöden (NHL | 01 …) visar "Commercial Break" i pauserna och hamnar därför efter de andra.
