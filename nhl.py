@@ -10,6 +10,7 @@ Körs av en timer på servern.  Användning:  python3 nhl.py
 """
 import json
 import re
+import time
 import unicodedata
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -119,6 +120,39 @@ def archive_fields(days):
 # Lokala tv-stationer (inte sportkanaler); de läggs sist bland en matchs tv-kanaler.
 LOCAL_TV = {"KONG", "KING", "KTVD", "KUSA", "KSTP", "KTTV", "Utah16", "KDFI", "SCRIPPS:VGK", "SCRIPPS:FLA"}
 # Tablå för kanaler där leverantören saknar EPG-id (MSG Sportsnet hette tidigare MSG Plus).
+# Bildkontrollen (verify.py): resultat, PID för en pågående stillbild och när en ström senast startades.
+VERIFY_FILE = SERVE / "verify.json"
+GRAB_PID_FILE = SERVE / "verify.pid"
+VIEWING_FILE = SERVE / "viewing"
+VERIFY_VALID_MIN = 40                          # så länge ett resultat från bildkontrollen gäller
+# Kanaler utan egen NHL-kod som ibland sänder matcher (MSG:s extrakanaler). Bildkontrollen avgör vilken
+# match de visar; utan bekräftelse används de inte.
+POOL = [r"^TV\| MSG (ALT-\d|SPORTSNET)\b"]
+
+
+def in_pool(name):
+    return any(re.search(rx, name.strip()) for rx in POOL)
+
+
+def verified(now=None):
+    """stream_id -> (spel-id, säker) som bildkontrollen sett kanalen visa. Kräver färska resultat och antingen
+    båda lagen på skylten (säker) eller två kontroller i rad som säger samma match."""
+    try:
+        checks = json.loads(VERIFY_FILE.read_text()).get("checks", {})
+    except (OSError, ValueError):
+        return {}
+    now = now or time.time()
+    out = {}
+    for sid, cs in checks.items():
+        fresh = [c for c in cs if now - c["at"] < VERIFY_VALID_MIN * 60]
+        if not fresh or not fresh[-1].get("game"):
+            continue
+        last = fresh[-1]
+        if last.get("sure") or (len(fresh) >= 2 and fresh[-2].get("game") == last["game"]):
+            out[int(sid)] = (last["game"], bool(last.get("sure")))
+    return out
+
+
 EPG_FALLBACK = {"MSGSN": "MadisonSquareGardenPlus.us", "ALT2": "AltitudeSports2.us", "KTVD": "MYKTVD.us"}
 
 
@@ -338,7 +372,9 @@ def broadcast_tv(game, tv):
     out = []
     for b in sorted(game.get("tvBroadcasts", []), key=rank):
         out += [t for t in tv if broadcast_keys(game, b) & set(t["codes"]) and t not in out]
-    return [t for t in out if not shows_other(t, game)][:MAX_TV]
+    seen = verified()                            # bildkontrollen: visar kanalen en annan match nu?
+    return [t for t in out if not shows_other(t, game)
+            and seen.get(t["real"], (game["id"],))[0] == game["id"]][:MAX_TV]
 
 
 def sources_for(game, streams, cats, tv=()):
@@ -346,6 +382,13 @@ def sources_for(game, streams, cats, tv=()):
     NHL anger dem, sedan matchströmmar som reserver."""
     by_id = {s["stream_id"]: s for s in streams}
     broadcast = [by_id[t["real"]] for t in broadcast_tv(game, tv) if t["real"] in by_id]
+    # Kanaler som bildkontrollen säkert (båda lagen) sett visa matchen, fast NHL:s lista eller namnet säger
+    # annat. Ett lag räcker inte för att lägga till, bara för att ta bort (i broadcast_tv).
+    known = {t["real"] for t in tv} | {s["stream_id"] for s in streams if in_pool(s.get("name", ""))}
+    for sid, (gid, sure) in verified().items():
+        if sure and gid == game["id"] and sid in known and sid in by_id and by_id[sid] not in broadcast:
+            broadcast.append(by_id[sid])
+    broadcast = broadcast[:MAX_TV]
     hits = [s for s in streams if carries_game(s.get("name", ""), cats.get(s.get("category_id"), ""), game)]
 
     def rank(s):
@@ -395,6 +438,9 @@ def short_source(stream, tv_codes=()):
         return "NHL-flöde"
     if up.startswith("NHL TEAM|"):
         return "Lagkanal " + clean(name.split("|", 1)[1]).strip().title()
+    if re.match(r"^(TV|US|CA)\|", name):           # vanlig kanal, t.ex. "TV| MSG ALT-1 ᴿᴬᵂ" -> "MSG ALT-1"
+        short = re.sub(r"^[A-Z]{2,4}\|\s*", "", name)
+        return re.sub(r"\s*\b(F?HD|UHD|4K)\b|[\u1d00-\u1dbf\u2070-\u209f]+", "", short).strip()[:26]
     return "Ström"
 
 

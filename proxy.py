@@ -14,6 +14,8 @@ Användning:  python3 proxy.py [--port 8080]
 """
 import argparse
 import json
+import os
+import signal
 import re
 import time
 import urllib.error
@@ -141,6 +143,19 @@ class Handler(BaseHTTPRequestHandler):
         result["problems"] = problems
         self.send(503 if problems else 200, json.dumps(result, ensure_ascii=False).encode())
 
+    @staticmethod
+    def stop_grab():
+        """Leverantören tillåter en ström åt gången: avbryt bildkontrollens stillbild (verify.py) direkt när
+        en kanal startas, och markera att en ström är igång så att kontrollen väntar."""
+        try:
+            nhl.VIEWING_FILE.touch()
+            pid = int(nhl.GRAB_PID_FILE.read_text())
+            os.kill(pid, signal.SIGTERM)
+            nhl.GRAB_PID_FILE.unlink(missing_ok=True)
+            time.sleep(1)                          # ge leverantören en stund att släppa anslutningen
+        except (OSError, ValueError):
+            pass
+
     def do_HEAD(self):
         self.do_GET()
 
@@ -174,6 +189,7 @@ class Handler(BaseHTTPRequestHandler):
                 if not real:
                     return self.send(404, b'{"error":"no source"}')
                 path = self.path.replace(f"stream={stream}", f"stream={real}")
+            self.stop_grab()
             return self.send(302, extra={"Location": UPSTREAM + path})
 
         if url.path == "/xmltv.php":
